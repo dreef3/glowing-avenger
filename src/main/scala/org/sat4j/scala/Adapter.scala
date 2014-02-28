@@ -14,7 +14,7 @@ case object Unknown extends Status {}
 
 class Problem {
 
-  val problem = SolverFactory.newDefault
+  val problem = SolverFactory.newLight
 
   /** Adds a clause in the problem. */
   def +=(clause: IVecInt) = {

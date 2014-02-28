@@ -378,7 +378,7 @@ object Logic {
     val idents = indexes map {
       case (x, y) => (y, if (cnf contains y) Ident(x) else ~Ident(x))
     }
-    def disj(d: List[Int]): BoolExp = (False.asInstanceOf[BoolExp] /: d)(_ | idents(_))
+    def disj(d: List[Int]): BoolExp = (False.asInstanceOf[BoolExp] /: d)((b, i) => b | (if (i > 0) idents(i) else Not(idents(-i))))
     (True.asInstanceOf[BoolExp] /: cnf)(_ & disj(_))
   }
 
