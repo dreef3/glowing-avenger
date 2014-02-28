@@ -2,7 +2,6 @@ package com.glowingavenger.agent
 
 import org.sat4j.scala.Logic._
 import org.scalatest._
-import org.scalamock.scalatest.MockFactory
 
 class BackwardSearchSpec extends FlatSpec with Matchers {
   behavior of "Backward search"
