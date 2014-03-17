@@ -21,4 +21,34 @@ class BeliefStateSpec extends FlatSpec with Matchers {
     val clause = 'B & ~'C
     BeliefState.fromBoolExp(clause, attrs) shouldBe new BeliefState(Map('A -> None, 'B -> Some(true), 'C -> Some(false), 'D -> None))
   }
+
+  it should "not be included if any attribute is not present" in {
+    val inner = new BeliefState(Map('A -> Some(true), 'B -> None))
+    val outer = new BeliefState(Map('A -> Some(true), 'C -> Some(false)))
+    outer includes inner shouldBe false
+  }
+
+  it should "not be included if any attribute has different value" in {
+    val inner = new BeliefState(Map('A -> Some(true), 'B -> Some(true)))
+    val outer = new BeliefState(Map('A -> Some(true), 'B -> Some(false)))
+    outer includes inner shouldBe false
+  }
+
+  it should "not be included if inner attribute is unknown" in {
+    val inner = new BeliefState(Map('A -> Some(true), 'B -> None))
+    val outer = new BeliefState(Map('A -> Some(true), 'B -> Some(false)))
+    outer includes inner shouldBe false
+  }
+
+  it should "be included if outer attribute is unknown" in {
+    val inner = new BeliefState(Map('A -> Some(true), 'B -> Some(false)))
+    val outer = new BeliefState(Map('A -> Some(true), 'B -> None))
+    outer includes inner shouldBe true
+  }
+
+  it should "not be included if all attributes have same values" in {
+    val inner = new BeliefState(Map('A -> Some(true), 'B -> Some(false)))
+    val outer = new BeliefState(Map('A -> Some(true), 'B -> Some(false), 'C -> Some(true)))
+    outer includes inner shouldBe true
+  }
 }

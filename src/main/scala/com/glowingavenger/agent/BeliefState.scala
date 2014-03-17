@@ -14,6 +14,8 @@ object BeliefState {
 }
 
 class BeliefState(val attrs: Map[Symbol, Option[Boolean]]) {
+  val unknown = attrs.filter(!_._2.isDefined).keys.toList
+
   def asBoolExp: BoolExp = {
     val expList = for {
       attr <- attrs
@@ -23,7 +25,13 @@ class BeliefState(val attrs: Map[Symbol, Option[Boolean]]) {
   }
 
   def includes(state: BeliefState): Boolean = {
-    state.attrs.keySet.find(!attrs.keySet.contains(_)) == None
+    state.attrs.find(e =>
+      !attrs.contains(e._1) || (attrs(e._1) != e._2 && attrs(e._1) != None)
+    ) == None
+  }
+
+  def countEqual(state: BeliefState) = {
+    attrs.count(p => state.attrs.contains(p._1) && state.attrs(p._1) == p._2)
   }
 
   override def toString: String = attrs.mkString(", ")
@@ -40,5 +48,13 @@ class BeliefState(val attrs: Map[Symbol, Option[Boolean]]) {
   override def hashCode(): Int = {
     val state = Seq(attrs)
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+  }
+}
+
+case class ProducedState(override val attrs: Map[Symbol, Option[Boolean]], producer: Action) extends BeliefState(attrs)
+
+object ProducedState {
+  @inline implicit def beliefState2ProducedState(state: BeliefState): ProducedState = {
+    new ProducedState(state.attrs, NoAction())
   }
 }
