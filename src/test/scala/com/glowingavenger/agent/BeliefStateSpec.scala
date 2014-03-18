@@ -2,6 +2,7 @@ package com.glowingavenger.agent
 
 import org.scalatest.{Matchers, FlatSpec}
 import org.sat4j.scala.Logic._
+import com.glowingavenger.agent.problem.BeliefState
 
 class BeliefStateSpec extends FlatSpec with Matchers {
   behavior of "Belief State"

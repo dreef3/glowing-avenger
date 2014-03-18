@@ -1,4 +1,4 @@
-package com.glowingavenger.agent
+package com.glowingavenger.agent.problem
 
 import org.sat4j.scala.Logic._
 import com.glowingavenger.agent.util.Model
@@ -8,7 +8,7 @@ object BeliefState {
     val unknowns = attrs.map(attr => (attr, None.asInstanceOf[Option[Boolean]])).toMap
     Model.retrieveModels(clause) match {
       case Some(clauseAttrs) => new BeliefState(unknowns ++ clauseAttrs)
-      case None => throw new IllegalArgumentException("Unsatisfiable clause")
+      case None => throw new IllegalArgumentException("Unsatisfiable clause: " + PrettyPrint(clause))
     }
   }
 }
@@ -49,6 +49,14 @@ class BeliefState(val attrs: Map[Symbol, Option[Boolean]]) {
     val state = Seq(attrs)
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
+}
+
+case class Answer(override val attrs: Map[Symbol, Option[Boolean]], attr: Symbol) extends BeliefState(attrs) {
+  require(attrs.keySet.contains(attr))
+  require(attrs(attr) == None)
+
+  val yes = new BeliefState(attrs ++ Map(attr -> Some(true)))
+  val no = new BeliefState(attrs ++ Map(attr -> Some(false)))
 }
 
 case class ProducedState(override val attrs: Map[Symbol, Option[Boolean]], producer: Action) extends BeliefState(attrs)

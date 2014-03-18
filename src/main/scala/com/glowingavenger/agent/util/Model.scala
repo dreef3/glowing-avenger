@@ -10,8 +10,8 @@ object Model {
   def retrieveSymbols(model: Map[Symbol, Option[Boolean]], clause: BoolExp): Option[Map[Symbol, Option[Boolean]]] = {
     retrieveModels(clause) match {
       case None => None
-      case Some(initModel) => Some(model map {
-        p => (p._1, if (initModel contains p._1) initModel(p._1) else None)
+      case Some(clauseModel) => Some(model map {
+        p => (p._1, if (clauseModel contains p._1) clauseModel(p._1) else None)
       })
     }
   }

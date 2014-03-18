@@ -3,8 +3,9 @@ package com.glowingavenger.agent
 import org.sat4j.scala.Logic._
 import com.glowingavenger.agent.util.Model
 import Model._
+import com.glowingavenger.agent.problem.LogicAction
 
-class BackwardSearchStep(val symbols: List[Symbol], val actions: List[LogicAction], initial: Option[BoolExp], val name: String = "") {
+class BackwardSearch(val symbols: List[Symbol], val actions: List[LogicAction], initial: Option[BoolExp], val name: String = "") {
 
   val axiom = if (initial.isDefined) initial.get else True
 

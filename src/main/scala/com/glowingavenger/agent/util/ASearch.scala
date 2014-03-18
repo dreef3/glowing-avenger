@@ -8,7 +8,7 @@ import scala.collection.SortedSet
 trait ASearch[N] {
 
   private class Node(val v: N, val hCost: Int, val parent: Option[Node]) extends Ordered[Node] {
-    val totalCost = cost(v) + hCost + (if (parent.isDefined) parent.get.totalCost else 0)
+    val totalCost:Int = cost(v) + hCost + (if (parent.isDefined) parent.get.totalCost else 0)
 
     override def compare(that: Node): Int = totalCost.compare(that.totalCost)
   }
