@@ -11,9 +11,9 @@ class ASearchSpec extends FlatSpec with Matchers {
   trait Env {
     val actions = List(LogicAction(~'S & 'B, 'S & 'L, "on"), LogicAction('S, ~'S, "off"), LogicAction(~'B & ~'S, 'B, "ch"), LogicAction('B, ~'B, "br"))
     val search = new ASearch[(BeliefState, Action)]{
-      override def isGoal(node: (BeliefState, Action), goal: (BeliefState, Action)): Boolean = goal._1 == node._1
+      override def isGoal(node: (BeliefState, Action), goal: (BeliefState, Action)): Boolean = goal._1 includes node._1
 
-      override def heruisticCost(init: (BeliefState, Action), goal: (BeliefState, Action)): Int = 0
+      override def hCost(init: (BeliefState, Action), goal: (BeliefState, Action)): Int = 0
 
       override def cost(node: (BeliefState, Action)): Int = 1
 

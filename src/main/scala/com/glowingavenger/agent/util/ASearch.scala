@@ -19,13 +19,13 @@ trait ASearch[N] {
 
   def cost(node: N): Int
 
-  def heruisticCost(init: N, goal: N): Int
+  def hCost(init: N, goal: N): Int
 
   def isGoal(node: N, goal: N): Boolean
 
   def search(init: N, goal: N): Option[List[N]] = {
     def successorNodes(node: Node) = {
-      Set(successors(node.v).map(new Node(_, heruisticCost(node.v, goal), Some(node))): _*)
+      Set(successors(node.v).map(new Node(_, hCost(node.v, goal), Some(node))): _*)
     }
 
     def doSearch(frontier: Set[Node], explored: Set[Node], goal: N): Option[List[N]] = {
@@ -42,11 +42,11 @@ trait ASearch[N] {
           while(it.hasNext) {
             val child = it.next()
             if (!explored.exists(_.v == child) && !frontier.exists(_.v == child)) {
-              newFrontier.add(new Node(child, heruisticCost(child, goal), Some(best)))
+              newFrontier.add(new Node(child, hCost(child, goal), Some(best)))
             } else {
               frontier.find(n => n.v == child && n.totalCost > best.totalCost + cost(child)) match {
                 case None => ()
-                case Some(n) => newFrontier = newFrontier - n + new Node(child, heruisticCost(child, goal), Some(best))
+                case Some(n) => newFrontier = newFrontier - n + new Node(child, hCost(child, goal), Some(best))
               }
             }
           }
@@ -56,7 +56,7 @@ trait ASearch[N] {
       }
     }
 
-    doSearch(Set(new Node(init, heruisticCost(init, goal), None)), Set[Node](), goal)
+    doSearch(Set(new Node(init, hCost(init, goal), None)), Set[Node](), goal)
   }
 
   private def solution(node: Node): List[N] = {
