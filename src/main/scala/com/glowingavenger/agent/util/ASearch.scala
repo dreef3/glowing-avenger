@@ -1,14 +1,16 @@
 package com.glowingavenger.agent.util
 
-import scala.collection.SortedSet
+import scala.collection.mutable.Set
 
 /**
  * Special version of A* Search algorithm for the case when graph is dynamically generated on the fly.
  */
 trait ASearch[N] {
 
-  private class Node(val v: N, val hCost: Int, val parent: Option[Node]) extends Ordered[Node] {
-    val totalCost:Int = cost(v) + hCost + (if (parent.isDefined) parent.get.totalCost else 0)
+  private class Node(val v: N, hCost: Int, val parent: Option[Node]) extends Ordered[Node] {
+    val totalCost: Int = cost(v) + hCost + (if (parent.isDefined) parent.get.totalCost else 0)
+
+    override def toString: String = v.toString + ", (" + totalCost + ")"
 
     override def compare(that: Node): Int = totalCost.compare(that.totalCost)
   }
@@ -23,33 +25,38 @@ trait ASearch[N] {
 
   def search(init: N, goal: N): Option[List[N]] = {
     def successorNodes(node: Node) = {
-      SortedSet(successors(node.v).map(new Node(_, heruisticCost(node.v, goal), Some(node))): _*)
+      Set(successors(node.v).map(new Node(_, heruisticCost(node.v, goal), Some(node))): _*)
     }
 
-    def doSearch(frontier: SortedSet[Node], explored: SortedSet[Node], goal: N): Option[List[N]] = {
+    def doSearch(frontier: Set[Node], explored: Set[Node], goal: N): Option[List[N]] = {
       if (frontier.isEmpty)
         None
       else {
-        val best = frontier.head
+        val best = frontier.minBy(_.totalCost)
         if (isGoal(best.v, goal))
           Some(solution(best))
         else {
-          var newFrontier = frontier - best
           val newExplored = explored + best
-          for (child <- successorNodes(best)) {
-            newFrontier = if (!newExplored.exists(_.v == child.v) && !newFrontier.exists(_.v == child.v)) {
-              newFrontier + child
-            } else newFrontier.find(n => n.v == child.v && n.totalCost > child.totalCost) match {
-              case Some(n) => newFrontier - n + child
-              case None => newFrontier
+          val it = successors(best.v).toIterator
+          var newFrontier = frontier.clone() - best
+          while(it.hasNext) {
+            val child = it.next()
+            if (!explored.exists(_.v == child) && !frontier.exists(_.v == child)) {
+              newFrontier.add(new Node(child, heruisticCost(child, goal), Some(best)))
+            } else {
+              frontier.find(n => n.v == child && n.totalCost > best.totalCost + cost(child)) match {
+                case None => ()
+                case Some(n) => newFrontier = newFrontier - n + new Node(child, heruisticCost(child, goal), Some(best))
+              }
             }
           }
+
           doSearch(newFrontier, newExplored, goal)
         }
       }
     }
 
-    doSearch(SortedSet(new Node(init, heruisticCost(init, goal), None)), SortedSet[Node](), goal)
+    doSearch(Set(new Node(init, heruisticCost(init, goal), None)), Set[Node](), goal)
   }
 
   private def solution(node: Node): List[N] = {
