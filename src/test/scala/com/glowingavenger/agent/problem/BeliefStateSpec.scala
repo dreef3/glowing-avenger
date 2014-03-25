@@ -1,8 +1,7 @@
-package com.glowingavenger.agent
+package com.glowingavenger.agent.problem
 
 import org.scalatest.{Matchers, FlatSpec}
 import org.sat4j.scala.Logic._
-import com.glowingavenger.agent.problem.BeliefState
 
 class BeliefStateSpec extends FlatSpec with Matchers {
   behavior of "Belief State"
@@ -21,12 +20,6 @@ class BeliefStateSpec extends FlatSpec with Matchers {
     val attrs = List('A, 'B, 'D)
     val clause = 'B & ~'C
     BeliefState.fromBoolExp(clause, attrs) shouldBe new BeliefState(Map('A -> None, 'B -> Some(true), 'C -> Some(false), 'D -> None))
-  }
-
-  it should "not be included if any attribute is not present" in {
-    val inner = new BeliefState(Map('A -> Some(true), 'B -> None))
-    val outer = new BeliefState(Map('A -> Some(true), 'C -> Some(false)))
-    outer includes inner shouldBe false
   }
 
   it should "not be included if any attribute has different value" in {
@@ -51,5 +44,12 @@ class BeliefStateSpec extends FlatSpec with Matchers {
     val inner = new BeliefState(Map('A -> Some(true), 'B -> Some(false)))
     val outer = new BeliefState(Map('A -> Some(true), 'B -> Some(false), 'C -> Some(true)))
     outer includes inner shouldBe true
+  }
+
+  it should "be ok" in {
+    val inner = new BeliefState(Map('L -> Some(true)))
+    val outer = new BeliefState(Map('L -> Some(true), 'B -> Some(true), 'S -> Some(true)))
+    outer includes inner shouldBe true
+
   }
 }

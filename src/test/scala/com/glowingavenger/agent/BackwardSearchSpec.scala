@@ -1,10 +1,9 @@
 package com.glowingavenger.agent
 
 import org.sat4j.scala.Logic._
-import org.scalatest._
 import com.glowingavenger.agent.problem.LogicAction
 
-class BackwardSearchSpec extends FlatSpec with Matchers {
+class BackwardSearchSpec extends PlanSpec {
   behavior of "Backward search"
 
   it should "return None when it's not possible to achieve the goal" in {
@@ -12,7 +11,7 @@ class BackwardSearchSpec extends FlatSpec with Matchers {
     val init: BoolExp = ~'L
     val goal: BoolExp = 'L
 
-    val res = agent.backwardSearch(init, goal)
+    val res = agent.search(init, goal)
     res shouldBe None
   }
 
@@ -21,7 +20,7 @@ class BackwardSearchSpec extends FlatSpec with Matchers {
     val init: BoolExp = 'L
     val goal: BoolExp = 'L
 
-    val res = agent.backwardSearch(init, goal)
+    val res = agent.search(init, goal)
     res shouldBe Some(Map('L -> Some(true)))
   }
 
@@ -31,7 +30,7 @@ class BackwardSearchSpec extends FlatSpec with Matchers {
 
     val agent = new BackwardSearch(List('L, 'S, 'B), LogicAction(init, goal) :: Nil, None)
 
-    val res = agent.backwardSearch(init, goal)
+    val res = agent.search(init, goal)
     res shouldBe Some(Map('L -> Some(false)))
   }
 
@@ -41,17 +40,14 @@ class BackwardSearchSpec extends FlatSpec with Matchers {
 
     val agent = new BackwardSearch(List('L, 'S, 'B), List(LogicAction(~'B, goal), LogicAction('B, ~'B)), None)
 
-    val res = agent.backwardSearch(init, goal)
+    val res = agent.search(init, goal)
     res shouldBe Some(Map('L -> Some(false), 'B -> None))
   }
 
-  it should "pass a more complex example" in {
-    val init: BoolExp = ~'L
-    val goal: BoolExp = 'L
-    val actions = List(LogicAction(~'B & ~'S, 'B), LogicAction(~'S, 'S), LogicAction('S, ~'S), LogicAction('B, ~'B))
-    val agent = new BackwardSearch(List('L, 'S, 'B, 'N, 'D), actions, Some('L iff 'S & 'B))
+  it should "pass a more complex example" in new ProblemEnv {
+    val algo = new BackwardSearch(List('L, 'S, 'B, 'N, 'D), actions, Some('L iff 'S & 'B))
 
-    val res = agent.backwardSearch(init, goal)
+    val res = algo.search(init.asBoolExp, goal.asBoolExp)
     res shouldBe Some(Map('S -> None, 'L -> Some(false), 'B -> None))
   }
 }

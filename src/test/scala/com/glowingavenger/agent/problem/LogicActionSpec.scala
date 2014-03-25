@@ -1,8 +1,8 @@
-package com.glowingavenger.agent
+package com.glowingavenger.agent.problem
 
 import org.scalatest.{Matchers, FlatSpec}
 import org.sat4j.scala.Logic._
-import com.glowingavenger.agent.problem.{LogicAction, BeliefState}
+import com.glowingavenger.agent.problem.LogicAction
 
 class LogicActionSpec extends FlatSpec with Matchers {
   behavior of "Logic Action"

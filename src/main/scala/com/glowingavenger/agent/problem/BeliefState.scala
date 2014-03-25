@@ -15,6 +15,7 @@ object BeliefState {
 
 class BeliefState(val attrs: Map[Symbol, Option[Boolean]]) {
   val unknown = attrs.filter(!_._2.isDefined).keys.toList
+  val known = attrs.filter(_._2.isDefined)
 
   def asBoolExp: BoolExp = {
     val expList = for {
@@ -25,16 +26,24 @@ class BeliefState(val attrs: Map[Symbol, Option[Boolean]]) {
   }
 
   def includes(state: BeliefState): Boolean = {
-    state.attrs.find(e =>
-      !attrs.contains(e._1) || (attrs(e._1) != e._2 && attrs(e._1) != None)
-    ) == None
+    !state.attrs.exists(a => {
+      val (s, v) = a
+      attrs.contains(s) && attrs(s) != v && attrs(s).isDefined
+    })
   }
 
   def countEqual(state: BeliefState) = {
     attrs.count(p => state.attrs.contains(p._1) && state.attrs(p._1) == p._2)
   }
 
-  override def toString: String = attrs.mkString(", ")
+  override def toString: String = {
+    val strAttrs = attrs map {
+      case (s, Some(v)) if v => s.name
+      case (s, Some(v)) => "-" + s.name
+      case (s, None) => s.name + "?"
+    }
+    strAttrs.mkString("(", " ", ")")
+  }
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[BeliefState]
 

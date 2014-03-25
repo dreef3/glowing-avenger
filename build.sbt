@@ -13,3 +13,5 @@ libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0" % "test"
 libraryDependencies += "org.ow2.sat4j" % "org.ow2.sat4j.core" % "2.3.5"
 
 libraryDependencies += "com.assembla.scala-incubator" % "graph-core_2.10" % "1.8.0"
+
+libraryDependencies += "com.assembla.scala-incubator" % "graph-dot_2.10" % "1.8.0"

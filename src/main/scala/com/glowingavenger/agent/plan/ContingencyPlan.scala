@@ -10,14 +10,15 @@ import scalax.collection.GraphEdge._
 import scalax.collection.edge.WLDiEdge
 import scala.collection.immutable.Queue
 import com.glowingavenger.agent.util.ASearch
+import com.glowingavenger.agent.BackwardSearch
 
-object SimplePlan {
-  def apply(problem: Problem) = new SimplePlan(problem)
+object ContingencyPlan {
+  def apply(problem: Problem) = new ContingencyPlan(problem)
 
-  def build(problem: Problem) = SimplePlan(problem).build()
+  def build(problem: Problem) = ContingencyPlan(problem).build()
 }
 
-class SimplePlan(val problem: Problem) {
+class ContingencyPlan(val problem: Problem) {
   val guaranteed = new ASearch[(BeliefState, Action)]{
     override def isGoal(node: (BeliefState, Action), goal: (BeliefState, Action)): Boolean = goal._1 includes node._1
 
@@ -29,10 +30,18 @@ class SimplePlan(val problem: Problem) {
       action <- problem.actions
       result = action.result(node._1)
       if result != node._1
-    } yield (result, action)
+    } yield (withKB(result), action)
   }
 
+  val backward = new BackwardSearch(problem.attrs,
+    for (a <- problem.actions if a.isInstanceOf[LogicAction]) yield a.asInstanceOf[LogicAction],
+    Some(problem.kb))
+
   def build(): Graph[BeliefState, WLDiEdge] = {
+    val init = backward.search(problem.init.asBoolExp, problem.goal.asBoolExp) match {
+      case Some(c) => new BeliefState(c)
+      case None => throw new UnsupportedOperationException("Goal is unreachable")
+    }
     val front = Queue(problem.init)
     val empty = Graph[BeliefState, WLDiEdge]()
     buildRec(front, empty)
@@ -44,7 +53,8 @@ class SimplePlan(val problem: Problem) {
       val (next, nextQueue) = front.dequeue
       val askers = askSuccessors(next)
       val additions = askers.unzip._1.toIterable
-      buildRec(nextQueue ++ additions, plan ++ (pathToGoal(next) ::: list2Edges(next, askers)))
+      val guaranteedPath = pathToGoal(next)
+      buildRec(nextQueue ++ additions, plan ++ (guaranteedPath ::: list2Edges(next, askers)))
     }
   }
 
@@ -68,11 +78,15 @@ class SimplePlan(val problem: Problem) {
       (path.head._1 ~%+> path.tail.head._1)(path.tail.head._2.cost, path.tail.head._2) :: Nil ::: path2Edges(path.tail)
   }
 
+  private def withKB(state: BeliefState): BeliefState = {
+    BeliefState.fromBoolExp(state.asBoolExp & problem.kb, state.attrs.keys)
+  }
+
   private def askSuccessors(state: BeliefState): List[(BeliefState, Action)] = {
     state.unknown.map(AskAction).map {
       ask =>
         ask.result(state) match {
-          case a: Answer => (a.yes, ask) :: (a.no, ask) :: Nil
+          case a: Answer => (withKB(a.yes), ask) :: (withKB(a.no), ask) :: Nil
           case _ => Nil
         }
     }.flatten

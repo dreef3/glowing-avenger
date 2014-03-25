@@ -5,9 +5,9 @@ import com.glowingavenger.agent.util.Model
 import Model._
 import com.glowingavenger.agent.problem.LogicAction
 
-class BackwardSearch(val symbols: List[Symbol], val actions: List[LogicAction], initial: Option[BoolExp], val name: String = "") {
+class BackwardSearch(val attrs: List[Symbol], val actions: List[LogicAction], kb: Option[BoolExp]) {
 
-  val axiom = if (initial.isDefined) initial.get else True
+  val axiom = if (kb.isDefined) kb.get else True
 
   /**
    * Depth-first search for actions with any models which satisfy a provided goal.
@@ -21,7 +21,7 @@ class BackwardSearch(val symbols: List[Symbol], val actions: List[LogicAction], 
    * @return a sub-sequence of this Agent's symbols which are required to be inferred in order to achieve the goal
    *         along with their inferred values (if it's possible)
    */
-  def backwardSearch(init: BoolExp, goal: BoolExp): Option[Map[Symbol, Option[Boolean]]] = {
+  def search(init: BoolExp, goal: BoolExp): Option[Map[Symbol, Option[Boolean]]] = {
     val clause = axiom & init & goal
     retrieveModels(clause) match {
       case None => backwardAction(init, goal)

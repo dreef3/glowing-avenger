@@ -13,7 +13,7 @@ trait Action {
 
   def result(state: BeliefState): BeliefState
 
-  override def toString: String = name
+  override def toString: String = s"$name($cost)"
 }
 
 case class AskAction(attr: Symbol) extends Action {
@@ -29,7 +29,7 @@ case class AskAction(attr: Symbol) extends Action {
 
   override def attrs: List[Symbol] = attr :: Nil
 
-  override val name: String = AskAction.getClass.getSimpleName + attr
+  override val name: String = s"Ask$attr"
 
   override val cost: Int = 0
 }
