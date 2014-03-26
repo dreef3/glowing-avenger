@@ -56,6 +56,8 @@ object Logic {
 
     def unary_~() = Not(this)
 
+    def ? = Or(this, Not(this))
+
     def +(b: BoolExp) = Card(List(b, this))
 
     def ===(k: Int) = CardEQ(List(this), k)

@@ -18,6 +18,8 @@ object ContingencyPlan {
   def build(problem: Problem) = ContingencyPlan(problem).build()
 }
 
+case class PlanDescription(init: BeliefState, plan: Graph[BeliefState, WLDiEdge], problem: Problem)
+
 class ContingencyPlan(val problem: Problem) {
   val guaranteed = new ASearch[(BeliefState, Action)]{
     override def isGoal(node: (BeliefState, Action), goal: (BeliefState, Action)): Boolean = goal._1 includes node._1
@@ -37,14 +39,15 @@ class ContingencyPlan(val problem: Problem) {
     for (a <- problem.actions if a.isInstanceOf[LogicAction]) yield a.asInstanceOf[LogicAction],
     Some(problem.kb))
 
-  def build(): Graph[BeliefState, WLDiEdge] = {
+  def build(): PlanDescription = {
     val init = backward.search(problem.init.asBoolExp, problem.goal.asBoolExp) match {
       case Some(c) => new BeliefState(c)
       case None => throw new UnsupportedOperationException("Goal is unreachable")
     }
-    val front = Queue(problem.init)
+    val front = Queue(init)
     val empty = Graph[BeliefState, WLDiEdge]()
-    buildRec(front, empty)
+    val graph = buildRec(front, empty)
+    PlanDescription(init, graph, problem)
   }
 
   private def buildRec(front: Queue[BeliefState], plan: Graph[BeliefState, WLDiEdge]): Graph[BeliefState, WLDiEdge] = {

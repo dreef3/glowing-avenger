@@ -4,6 +4,8 @@ import org.sat4j.scala.Logic._
 import scala.Some
 
 object Model {
+  private val ExtraLiteral = 'ExtraLiteral
+
   /**
    * Checks which symbols in the model are actually inferred from init
    */
@@ -23,14 +25,18 @@ object Model {
     }
   }
 
-  def retrieveModels(clause: BoolExp): Option[Map[Symbol, Option[Boolean]]] = {
-    allSat[Symbol](clause) match {
-      case (true, models) if models.isDefined => Some(parseModels(models.get))
-      // For the case of trivial clause such as 'L & 'L allSat doesn't produce a single model
-      case (false, Some(_)) => isSat[Symbol](clause) match {
-        case (true, model) if model.isDefined => Some(parseModels(model.get :: Nil))
-        case _ => None
+  def retrieveModels(clause: BoolExp, extraLiteral:Option[Symbol] = None): Option[Map[Symbol, Option[Boolean]]] = {
+    def withoutExtra(model: Map[Symbol, Boolean]) = {
+      extraLiteral match {
+        case Some(l) => model - l
+        case _ => model
       }
+    }
+    allSat[Symbol](clause) match {
+      case (true, models) if models.isDefined => Some(parseModels(models.get.map(withoutExtra)))
+      // For the case of trivial clause such as 'L & 'L allSat doesn't produce a single model
+      case (false, Some(_)) =>
+        retrieveModels(clause & ExtraLiteral, Some(ExtraLiteral))
       case _ => None
     }
   }
