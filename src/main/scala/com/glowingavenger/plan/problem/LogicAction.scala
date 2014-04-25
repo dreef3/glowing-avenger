@@ -1,8 +1,8 @@
-package com.glowingavenger.agent.problem
+package com.glowingavenger.plan.problem
 
 import org.sat4j.scala.Logic._
-import com.glowingavenger.agent.util.Model
-import com.glowingavenger.agent.problem.BeliefState
+import com.glowingavenger.plan.util.Model
+import com.glowingavenger.plan.problem.BeliefState
 
 class LogicAction(val precond: BoolExp, val effect: BoolExp, actionName: String) extends Action {
   require(isSat(precond)._1)

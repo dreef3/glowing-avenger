@@ -1,7 +1,6 @@
-package com.glowingavenger.agent.util
+package com.glowingavenger.plan.util
 
-import com.glowingavenger.agent.PlanSpec
-import com.glowingavenger.agent.plan.ContingencyPlan
+import com.glowingavenger.plan.{ContingencyPlan, PlanSpec}
 
 class PlanExportSpec extends PlanSpec {
   behavior of "Exporter to DOT"

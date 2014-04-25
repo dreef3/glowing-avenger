@@ -1,8 +1,8 @@
-package com.glowingavenger.agent.plan
+package com.glowingavenger.plan.plan
 
 import org.sat4j.scala.Logic._
-import com.glowingavenger.agent.problem._
-import com.glowingavenger.agent.PlanSpec
+import com.glowingavenger.plan.problem._
+import com.glowingavenger.plan.{ContingencyPlan, PlanSpec}
 
 class ContingencyPlanSpec extends PlanSpec {
   behavior of "Simple Plan Builder"

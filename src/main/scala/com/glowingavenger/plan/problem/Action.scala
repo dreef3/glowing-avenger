@@ -1,4 +1,4 @@
-package com.glowingavenger.agent.problem
+package com.glowingavenger.plan.problem
 
 import scala.collection.SortedMap
 

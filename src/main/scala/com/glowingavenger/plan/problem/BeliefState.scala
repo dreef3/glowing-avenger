@@ -1,7 +1,7 @@
-package com.glowingavenger.agent.problem
+package com.glowingavenger.plan.problem
 
 import org.sat4j.scala.Logic._
-import com.glowingavenger.agent.util.Model
+import com.glowingavenger.plan.util.Model
 
 object BeliefState {
   def fromBoolExp(clause: BoolExp, attrs: Iterable[Symbol] = Nil): BeliefState = {

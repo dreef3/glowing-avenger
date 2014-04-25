@@ -1,4 +1,4 @@
-package com.glowingavenger.agent.problem
+package com.glowingavenger.plan.problem
 
 import org.scalatest.{Matchers, FlatSpec}
 import org.sat4j.scala.Logic._

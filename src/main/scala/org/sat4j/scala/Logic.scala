@@ -362,7 +362,7 @@ object Logic {
     encodeCnf0(cnf, Map[BoolExp, Int]())
   }
 
-  // TODO This probably should be rewritten
+  // FIXME: Type check doesn't work as U is erased at compile time
   def encode[U](exp: BoolExp): (List[List[Int]], Map[U, Int]) = {
     val (cnfList, identMap) = encode(exp.toCnfList(new Context))
     val outMap: Map[U, Int] = identMap map (p => (p._1 match {

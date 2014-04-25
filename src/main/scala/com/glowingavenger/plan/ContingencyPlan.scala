@@ -1,16 +1,12 @@
-package com.glowingavenger.agent.plan
+package com.glowingavenger.plan
 
-import com.glowingavenger.agent.problem._
+import com.glowingavenger.plan.problem._
 import scalax.collection.Graph
-import scalax.collection.edge._
-import scalax.collection.edge.Implicits._
-import scalax.collection.edge.LBase._
 import scalax.collection.GraphPredef._
-import scalax.collection.GraphEdge._
+import scalax.collection.edge.Implicits._
 import scalax.collection.edge.WLDiEdge
 import scala.collection.immutable.Queue
-import com.glowingavenger.agent.util.ASearch
-import com.glowingavenger.agent.BackwardSearch
+import com.glowingavenger.plan.util.ASearch
 
 object ContingencyPlan {
   def apply(problem: Problem) = new ContingencyPlan(problem)

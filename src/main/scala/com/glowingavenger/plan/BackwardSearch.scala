@@ -1,9 +1,9 @@
-package com.glowingavenger.agent
+package com.glowingavenger.plan
 
 import org.sat4j.scala.Logic._
-import com.glowingavenger.agent.util.Model
+import com.glowingavenger.plan.util.Model
 import Model._
-import com.glowingavenger.agent.problem.LogicAction
+import com.glowingavenger.plan.problem.LogicAction
 
 class BackwardSearch(val attrs: List[Symbol], val actions: List[LogicAction], kb: Option[BoolExp]) {
 

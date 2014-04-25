@@ -1,7 +1,7 @@
-package com.glowingavenger.agent.util
+package com.glowingavenger.plan.util
 
 import org.scalatest.{Matchers, FlatSpec}
-import com.glowingavenger.agent.problem.{NoAction, Action, LogicAction, BeliefState}
+import com.glowingavenger.plan.problem.{NoAction, Action, LogicAction, BeliefState}
 import org.sat4j.scala.Logic._
 
 class ASearchSpec extends FlatSpec with Matchers {

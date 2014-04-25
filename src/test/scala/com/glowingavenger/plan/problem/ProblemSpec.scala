@@ -1,8 +1,8 @@
-package com.glowingavenger.agent.problem
+package com.glowingavenger.plan.problem
 
 import org.scalatest.{Matchers, FlatSpec}
 import org.sat4j.scala.Logic._
-import com.glowingavenger.agent.problem._
+import com.glowingavenger.plan.problem._
 
 class ProblemSpec extends FlatSpec with Matchers {
   behavior of "Problem"

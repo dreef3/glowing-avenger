@@ -1,4 +1,4 @@
-package com.glowingavenger.agent.util
+package com.glowingavenger.plan.util
 
 import org.sat4j.scala.Logic._
 import scala.Some
@@ -7,7 +7,7 @@ object Model {
   private val ExtraLiteral = 'ExtraLiteral
 
   /**
-   * Checks which symbols in the model are actually inferred from init
+   * Checks which symbols in the model are actually inferred from the clause
    */
   def retrieveSymbols(model: Map[Symbol, Option[Boolean]], clause: BoolExp): Option[Map[Symbol, Option[Boolean]]] = {
     retrieveModels(clause) match {
@@ -41,7 +41,7 @@ object Model {
     }
   }
 
-  def parseModels(models: List[Map[Symbol, Boolean]]): Map[Symbol, Option[Boolean]] = {
+  private def parseModels(models: List[Map[Symbol, Boolean]]): Map[Symbol, Option[Boolean]] = {
     val list = for (model <- models; pair <- model) yield pair
     list groupBy (_._1) map (p => {
       val set = p._2.unzip._2.toSet

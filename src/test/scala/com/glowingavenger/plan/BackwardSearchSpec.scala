@@ -1,7 +1,7 @@
-package com.glowingavenger.agent
+package com.glowingavenger.plan
 
 import org.sat4j.scala.Logic._
-import com.glowingavenger.agent.problem.LogicAction
+import com.glowingavenger.plan.problem.LogicAction
 
 class BackwardSearchSpec extends PlanSpec {
   behavior of "Backward search"
