@@ -16,7 +16,7 @@ trait Action {
   override def toString: String = name
 }
 
-case class AskAction(attr: Symbol) extends Action {
+case class Question(attr: Symbol) extends Action {
   override def result(state: BeliefState): BeliefState = {
     if (applicableIn(state))
       Answer(state.attrs, attr)

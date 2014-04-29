@@ -4,6 +4,8 @@ version := "0.0.1"
 
 scalaVersion := "2.10.3"
 
+javaHome := Some(file("/usr/lib/jvm/java-7-oracle/"))
+
 ideaExcludeFolders += ".idea"
 
 ideaExcludeFolders += ".idea_modules"
@@ -18,3 +20,4 @@ libraryDependencies += "com.assembla.scala-incubator" % "graph-dot_2.10" % "1.8.
 
 libraryDependencies += "org.jgrapht" % "jgrapht-core" % "0.9.0"
 
+libraryDependencies += "org.scala-lang" % "scala-actors" % "2.10.3"

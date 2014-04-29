@@ -8,6 +8,7 @@ import org.jgrapht.DirectedGraph
 import org.jgrapht.graph.{DefaultEdge, DefaultDirectedWeightedGraph}
 import java.util
 import com.glowingavenger.plan.PlanDescription
+import scala.collection.JavaConversions._
 
 object PlanExport {
   private val DotAttrLabel = "label"
@@ -38,16 +39,16 @@ object PlanExport {
     val plan = planDescr.plan
     val g = new DefaultDirectedWeightedGraph[java.util.Map[String, java.lang.Boolean], ActionEdge](classOf[ActionEdge])
     for {
-      e <- plan.edges
-      from: BeliefState = e.from
-      to: BeliefState = e.to
+      e: ActionEdge <- plan.edgeSet()
+      from = e.from
+      to = e.to
     } {
       g.addVertex(from)
       g.addVertex(to)
-      g.addEdge(from, to, new ActionEdge(from, to, e.label.asInstanceOf[Action]))
+      g.addEdge(from, to, new ActionEdge(from, to, e.action))
     }
 
-    val goal: BeliefState = plan.nodes find (planDescr.problem.goal includes _) match {
+    val goal: BeliefState = plan.vertexSet() find (planDescr.problem.goal includes) match {
       case Some(s) => s
       case None => null
     }

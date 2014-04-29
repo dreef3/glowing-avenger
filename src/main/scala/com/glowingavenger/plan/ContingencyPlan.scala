@@ -1,12 +1,12 @@
 package com.glowingavenger.plan
 
 import com.glowingavenger.plan.problem._
-import scalax.collection.Graph
-import scalax.collection.GraphPredef._
-import scalax.collection.edge.Implicits._
-import scalax.collection.edge.WLDiEdge
 import scala.collection.immutable.Queue
 import com.glowingavenger.plan.util.ASearch
+import org.jgrapht.DirectedGraph
+import org.jgrapht.graph.{DefaultDirectedGraph, DefaultEdge}
+import org.jgrapht.Graphs._
+import scala.collection.JavaConversions._
 
 object ContingencyPlan {
   def apply(problem: Problem) = new ContingencyPlan(problem)
@@ -14,7 +14,9 @@ object ContingencyPlan {
   def build(problem: Problem) = ContingencyPlan(problem).build()
 }
 
-case class PlanDescription(init: BeliefState, plan: Graph[BeliefState, WLDiEdge], problem: Problem)
+case class ActionEdge(from: BeliefState, to: BeliefState, action: Action) extends DefaultEdge
+
+case class PlanDescription(init: BeliefState, plan: DirectedGraph[BeliefState, ActionEdge], problem: Problem)
 
 class ContingencyPlan(val problem: Problem) {
   val guaranteed = new ASearch[(BeliefState, Action)]{
@@ -41,19 +43,24 @@ class ContingencyPlan(val problem: Problem) {
       case None => throw new UnsupportedOperationException("Goal is unreachable")
     }
     val front = Queue(init)
-    val empty = Graph[BeliefState, WLDiEdge]()
+    val empty = new DefaultDirectedGraph[BeliefState, ActionEdge](classOf[ActionEdge])
     val graph = buildRec(front, empty)
     PlanDescription(init, graph, problem)
   }
 
-  private def buildRec(front: Queue[BeliefState], plan: Graph[BeliefState, WLDiEdge]): Graph[BeliefState, WLDiEdge] = {
+  private def buildRec(front: Queue[BeliefState], plan: DirectedGraph[BeliefState, ActionEdge]): DirectedGraph[BeliefState, ActionEdge] = {
     if (front.isEmpty) plan
     else {
       val (next, nextQueue) = front.dequeue
       val askers = askSuccessors(next)
       val additions = askers.unzip._1.toIterable
       val guaranteedPath = pathToGoal(next)
-      buildRec(nextQueue ++ additions, plan ++ (guaranteedPath ::: list2Edges(next, askers)))
+      // TODO Create GraphImplicits for this
+      val newGraph = new DefaultDirectedGraph[BeliefState, ActionEdge](classOf[ActionEdge])
+      addGraph(newGraph, plan)
+      val edges = guaranteedPath ::: list2Edges(next, askers)
+      newGraph.edgeSet().addAll(edges)
+      buildRec(nextQueue ++ additions, newGraph)
     }
   }
 
@@ -64,17 +71,17 @@ class ContingencyPlan(val problem: Problem) {
     }
   }
 
-  private def list2Edges(from: BeliefState, successors: List[(BeliefState, Action)]): List[WLDiEdge[BeliefState]] = {
+  private def list2Edges(from: BeliefState, successors: List[(BeliefState, Action)]): List[ActionEdge] = {
     for {
       (to, action) <- successors
-    } yield (from ~%+> to)(action.cost, action)
+    } yield ActionEdge(from, to, action)
   }
   
-  private def path2Edges(path: List[(BeliefState, Action)]): List[WLDiEdge[BeliefState]] = {
+  private def path2Edges(path: List[(BeliefState, Action)]): List[ActionEdge] = {
     if (path.isEmpty || path.tail.isEmpty)
       Nil
     else
-      (path.head._1 ~%+> path.tail.head._1)(path.tail.head._2.cost, path.tail.head._2) :: Nil ::: path2Edges(path.tail)
+      ActionEdge(path.head._1, path.tail.head._1, path.tail.head._2) :: Nil ::: path2Edges(path.tail)
   }
 
   private def withKB(state: BeliefState): BeliefState = {
@@ -82,7 +89,7 @@ class ContingencyPlan(val problem: Problem) {
   }
 
   private def askSuccessors(state: BeliefState): List[(BeliefState, Action)] = {
-    state.unknown.map(AskAction).map {
+    state.unknown.map(Question).map {
       ask =>
         ask.result(state) match {
           case a: Answer => (withKB(a.yes), ask) :: (withKB(a.no), ask) :: Nil
