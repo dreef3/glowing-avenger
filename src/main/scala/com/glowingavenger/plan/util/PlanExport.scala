@@ -11,20 +11,6 @@ import com.glowingavenger.plan.PlanDescription
 import scala.collection.JavaConversions._
 
 object PlanExport {
-  private val DotAttrLabel = "label"
-
-  def export(plan: Graph[BeliefState, WLDiEdge]) = {
-    val root = DotRootGraph(directed = true, id = Some("Contingent_Plan"))
-
-    def edgeTransformer(innerEdge: Graph[BeliefState, WLDiEdge]#EdgeT): Option[(DotGraph, DotEdgeStmt)] = {
-      val edge = innerEdge.edge
-      val label = edge.label.asInstanceOf[Action]
-      Some(root, DotEdgeStmt(edge.from.toString(), edge.to.toString(), List(DotAttr(DotAttrLabel, label.toString))))
-    }
-
-    graph2DotExport(plan).toDot(dotRoot = root, edgeTransformer = edgeTransformer)
-  }
-
   private implicit def beliefState2JavaMap(state: BeliefState): java.util.Map[String, java.lang.Boolean] = {
     if (state == null)
       null
@@ -38,8 +24,9 @@ object PlanExport {
   def exportDescription(planDescr: PlanDescription): PlanDescr = {
     val plan = planDescr.plan
     val g = new DefaultDirectedWeightedGraph[java.util.Map[String, java.lang.Boolean], ActionEdge](classOf[ActionEdge])
+    val edges =  asScalaSet(plan.edgeSet())
     for {
-      e: ActionEdge <- plan.edgeSet()
+      e: com.glowingavenger.plan.ActionEdge <- edges
       from = e.from
       to = e.to
     } {

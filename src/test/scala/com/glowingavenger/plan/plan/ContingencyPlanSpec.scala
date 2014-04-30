@@ -10,7 +10,8 @@ class ContingencyPlanSpec extends PlanSpec {
   it should "produce a contingent plan for the problem" in new ProblemEnv {
     val planner = ContingencyPlan(problem)
     val planDescr = planner.build()
-    planDescr.plan should not be empty
-    planDescr.plan.nodes should contain(BeliefState.fromBoolExp('L & 'S  & 'B))
+    planDescr.plan.vertexSet() should not be empty
+    planDescr.plan.edgeSet() should not be empty
+    planDescr.plan.vertexSet() should contain(BeliefState.fromBoolExp('L & 'S  & 'B))
   }
 }

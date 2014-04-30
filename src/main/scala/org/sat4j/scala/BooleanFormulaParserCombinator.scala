@@ -45,9 +45,9 @@ object BooleanFormulaParserCombinator extends StandardTokenParsers with PackratP
   } | "(" ~> formula <~ ")" | lit
 
   val lit: PackratParser[BoolExp] =  "~" ~> ident ^^ {
-    case s => (s.toString()).unary_~
+    case s => (Symbol(s)).unary_~
   } | ident ^^ {
-    case s => (s.toString():BoolExp)
+    case s => (Symbol(s):BoolExp)
   } 
     
   /**

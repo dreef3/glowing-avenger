@@ -13,6 +13,6 @@ abstract class PlanSpec extends FlatSpec with Matchers {
     val init = BeliefState.fromBoolExp(~'L)
     val goal = BeliefState.fromBoolExp('L)
     val heruistic = (i: BeliefState, g: BeliefState) => i.countEqual(g)
-    val problem = new Problem(attrs, actions, kb, init, goal, heruistic)
+    val problem = new PDDLProblem(attrs, actions, kb, init, goal, heruistic)
   }
 }

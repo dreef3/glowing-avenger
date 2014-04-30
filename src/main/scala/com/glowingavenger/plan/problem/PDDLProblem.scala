@@ -3,7 +3,7 @@ package com.glowingavenger.plan.problem
 import org.sat4j.scala.Logic.BoolExp
 import org.sat4j.scala.Logic._
 
-class Problem (val attrs: List[Symbol], val actions: List[Action], val kb: BoolExp, val init: BeliefState, val goal: BeliefState, val heruistic: (BeliefState, BeliefState) => Int) {
+class PDDLProblem (val attrs: List[Symbol], val actions: List[Action], val kb: BoolExp, val init: BeliefState, val goal: BeliefState, val heruistic: (BeliefState, BeliefState) => Int) {
   require(init.attrs.keys.find(!attrs.contains(_)) == None)
   require(goal.attrs.keys.find(!attrs.contains(_)) == None)
   for (action <- actions) {
@@ -11,7 +11,7 @@ class Problem (val attrs: List[Symbol], val actions: List[Action], val kb: BoolE
   }
 }
 
-object Problem {
+object PDDLProblem {
   def lampProblem() = {
     val attrs = List('S, 'B, 'L, 'C, 'W)
     val kb = 'L iff 'B & 'S
@@ -20,6 +20,6 @@ object Problem {
     val init = BeliefState.fromBoolExp(~'L)
     val goal = BeliefState.fromBoolExp('L)
     val heruistic = (i: BeliefState, g: BeliefState) => i.countEqual(g)
-    new Problem(attrs, actions, kb, init, goal, heruistic)
+    new PDDLProblem(attrs, actions, kb, init, goal, heruistic)
   }
 }
