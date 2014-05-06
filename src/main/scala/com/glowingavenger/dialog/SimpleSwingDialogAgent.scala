@@ -1,12 +1,13 @@
 package com.glowingavenger.dialog
 
-import com.glowingavenger.plan.problem.{PDDLProblem, Question, Action, BeliefState}
+import com.glowingavenger.plan.model.{PlanProblem, Question, Action, BeliefState}
 import com.glowingavenger.plan.ActionEdge
 
 import scala.swing._
 import Dialog.Options._
 import Dialog.Result._
 import com.glowingavenger.agent.PlanExecutor
+import com.glowingavenger.plan.importexport.PDDL
 
 class SimpleSwingDialogAgent extends AbstractDialogAgent with ChooseFirstQuestion with ChooseFirstAction {
   override def onFinish(state: BeliefState, producer: Option[ActionEdge]) {
@@ -37,6 +38,6 @@ class SimpleSwingDialogAgent extends AbstractDialogAgent with ChooseFirstQuestio
 
 object SwingExample {
   def main(args: Array[String]) {
-    new PlanExecutor(PDDLProblem.lampProblem(), new SimpleSwingDialogAgent).exec()
+    new PlanExecutor(PDDL.importProblem("src/main/resources/Bulb.pddl"), new SimpleSwingDialogAgent).exec()
   }
 }

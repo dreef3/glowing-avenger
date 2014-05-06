@@ -1,9 +1,10 @@
 package com.glowingavenger.agent
 
-import com.glowingavenger.plan.problem.{BeliefState, PDDLProblem}
+import com.glowingavenger.plan.model.{Problem, BeliefState, PlanProblem}
 import com.glowingavenger.plan.{ActionEdge, ContingencyPlan}
 import scala.collection.JavaConversions._
 import scala.collection.mutable
+import com.glowingavenger.plan.model.BeliefStateImplicits._
 
 trait PlanTraversalListener {
   def onStateChange(before: Option[BeliefState], state: BeliefState,
@@ -13,7 +14,7 @@ trait PlanTraversalListener {
   def onFailure(state: BeliefState, producer: Option[ActionEdge])
 }
 
-class PlanExecutor(problem: PDDLProblem, listener: PlanTraversalListener) {
+class PlanExecutor(problem: Problem, listener: PlanTraversalListener) {
   def exec() {
     val plan = ContingencyPlan.build(problem)
 

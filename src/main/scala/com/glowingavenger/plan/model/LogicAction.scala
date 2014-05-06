@@ -1,4 +1,4 @@
-package com.glowingavenger.plan.problem
+package com.glowingavenger.plan.model
 
 import org.sat4j.scala.Logic._
 import com.glowingavenger.plan.util.Model
@@ -16,7 +16,29 @@ class LogicAction(val precond: BoolExp, val effect: BoolExp, actionName: String)
   override val attrs: List[Symbol] = (effectModels ++ precondModels).keySet.toList
   override val name: String = actionName
 
+
+  override def toString: String = s"LogicAction(${PrettyPrint(precond)}, ${PrettyPrint(effect)}, $name)"
+
   override val cost: Int = 1
+
+
+  def canEqual(other: Any): Boolean = other.isInstanceOf[LogicAction]
+
+  override def equals(other: Any): Boolean = other match {
+    case that: LogicAction =>
+      (that canEqual this) &&
+        attrs == that.attrs &&
+        name == that.name &&
+        cost == that.cost &&
+        precond == that.precond &&
+        effect == that.effect
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    val state = Seq(attrs, name, cost, precond, effect)
+    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+  }
 }
 
 object LogicAction {

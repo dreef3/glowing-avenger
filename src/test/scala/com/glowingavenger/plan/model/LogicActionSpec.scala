@@ -1,8 +1,7 @@
-package com.glowingavenger.plan.problem
+package com.glowingavenger.plan.model
 
 import org.scalatest.{Matchers, FlatSpec}
 import org.sat4j.scala.Logic._
-import com.glowingavenger.plan.problem.LogicAction
 
 class LogicActionSpec extends FlatSpec with Matchers {
   behavior of "Logic Action"

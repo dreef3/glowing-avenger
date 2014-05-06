@@ -4,120 +4,85 @@ import scala.util.parsing.combinator.syntactical.StandardTokenParsers
 import scala.util.parsing.combinator.lexical.StdLexical
 import org.sat4j.scala.Logic.{True, BoolExp}
 import org.sat4j.scala.Logic.identFromSymbol
-import com.glowingavenger.plan.problem.LogicAction
+import com.glowingavenger.plan.model.{Problem, UnboundProblem, Domain, LogicAction}
 import scala.util.parsing.combinator.PackratParsers
-import scala.io.Source
-import scala.util.parsing.input.CharArrayReader
+import scala.util.parsing.input
+import input.CharArrayReader.EofCh
+import scala.collection.mutable.ArrayBuffer
 
-case class Domain(name: String, predicates: Map[Symbol, String], actions: Map[LogicAction, String], kbase: List[BoolExp])
+object PDDL {
+  import PDDLParser._
+  private def parse[T](input: String)(implicit p: Parser[T]): T = {
+    val parser = phrase(p)
+    parser(new PackratReader[PDDLParser.Elem](new lexical.Scanner(input))) match {
+      case Success(t: T, _) => t
+      case NoSuccess(msg, i) =>
+        val a = i
+        throw new IllegalArgumentException(msg)
+    }
+  }
 
-case class ProblemStub(name: String, domain: String, init: BoolExp, goal: BoolExp)
+  def importProblem(input: String) = parse(input)(pddl)
 
-case class Problem(name: String, domain: Domain, init: BoolExp, goal: BoolExp)
+  def importDomain(input: String) = parse(input)(domain)
+}
 
-object PDDLParser extends StandardTokenParsers with PackratParsers {
-
-  case class DomainStub(name: String, predicates: Map[Symbol, String], actions: Map[String, String], kbase: List[BoolExp])
+private[importexport] object PDDLParser extends StandardTokenParsers with PackratParsers {
 
   override val lexical = new PDDLLexical
 
-  lazy val domain = ("(" ~> "define" ~> "(" ~> "domain" ~> ident <~ ")") ~ (rep(compositeAttr) ~ opt(kbase) <~ ")") ^^ {
-    case name ~ attrs => attrs match {
-      case attrList ~ Some(kb) => attrList match {
-        case List(("predicates", Some(predicateAttrs)), ("actions", Some(actionList))) =>
-          val predicateMap = (predicateAttrs map (p => (Symbol(p._1), p._2))).toMap
-          Some(DomainStub(name, predicateMap, actionList.toMap, kb))
-        case _ => None
+  lazy val domain = ("(" ~> "define" ~> "(" ~> "domain" ~> ident <~ ")") ~ predicatesDef ~ rep(structureDef) <~ ")" ^^ {
+    case name ~ predicates ~ structures =>
+      val actions = new ArrayBuffer[LogicAction]()
+      val axioms = new ArrayBuffer[BoolExp]()
+      structures foreach {
+        case Left(action: LogicAction) => actions += action
+        case Right(axiom: BoolExp) => axioms += axiom
       }
-      case _ => None
-    }
-    case _ => None
+      Domain(name, predicates, actions.toList, axioms.toList)
   }
 
-  lazy val compositeAttr = "(:" ~> ("predicates" | "actions") ~ opt(rep(attr)) <~ ")" ^^ {
-    case attrName ~ attrList => (attrName, attrList)
+  lazy val predicatesDef = ("(:" ~> "predicates") ~> (rep(predicate) <~ ")")
+
+  lazy val predicate = "(" ~> ident <~ ")" ^^ {
+    Symbol(_)
   }
 
-  lazy val predicates = "(:" ~> "predicates" ~> opt(rep(attr)) <~ ")"
-
-  lazy val actions = "(:" ~> "actions" ~> opt(rep(attr)) <~ ")"
-
-  lazy val kbase = ("(:" ~> "kbase") ~> opt(rep(formula)) <~ ")" ^^ {
-    case Some(list) => list filter {
-      case expr: BoolExp => true
-      case _ => false
-    } map {
-      case expr: BoolExp => expr
-      case _ => throw new IllegalArgumentException
-    }
-    case _ => Nil
+  lazy val structureDef = actionDef ^^ {
+    Left(_)
+  } | axiomDef ^^ {
+    Right(_)
   }
 
-  lazy val attr = ("(" ~> ident) ~ ("=" ~> stringLit <~ ")") ^^ (a => (a._1, a._2))
-
-/*  lazy val kbaseAttr = "(" ~> stringLit <~ ")" ^^ {
-    s =>
-      formula(new PackratReader(new BooleanFormulaParserCombinator.lexical.Scanner(s))) match {
-        // TODO Hacked the parser here so it returns Symbol instead of Strings as Idents. This should be fixed
-        // The problem is that encode() returns two more anonymous variables out of nowhere
-        case BooleanFormulaParserCombinator.Success(f: BoolExp, _) => Some(f)
-        case _ => println(s"failed to parse formula $s"); None
-      }
-  }*/
-
-  lazy val problem = ("(" ~> "define" ~> "(" ~> "problem" ~> ident <~ ")") ~ (domainAttr ~ rep(problemKBaseAttr) <~ ")") ^^ {
-    case name ~ attrs => attrs match {
-        case Some(domainName) ~ List(Some(("init", init)), Some(("goal", goal))) =>
-          Some(ProblemStub(name, domainName, init, goal))
-        case _ => None
-      }
-    case _ => None
+  lazy val actionDef = ("(:" ~> "action" ~> ident) ~ (actionBody <~ ")") ^^ {
+    case name ~ body => LogicAction(body._1, body._2, name)
   }
 
-  lazy val domainAttr = "(:" ~> "domain" ~ ident <~ ")" ^^ {
-    case "domain" ~ domainName => Some(domainName)
-    case _ => None
+  lazy val actionBody = (":" ~> "precondition" ~> logicExpr) ~ (":" ~> "effect" ~> logicExpr) ^^ {
+    case init ~ goal => (init, goal)
   }
 
-  lazy val problemKBaseAttr = "(:" ~> ("init" | "goal") ~ formula <~ ")" ^^ {
-    case name ~ expr => Some((name, expr))
-    case _ => None
+  lazy val axiomDef = ("(:" ~> "axiom") ~> (logicExpr <~ ")")
+
+  lazy val logicExpr = "(" ~> formula <~ ")"
+
+  lazy val problem = ("(" ~> "define" ~> "(" ~> "problem" ~> ident <~ ")") ~ ("(:" ~> "domain" ~> ident <~ ")") ~ initDef ~ goalDef <~ ")" ^^ {
+    case name ~ domainName ~ init ~ goal => UnboundProblem(name, domainName, init, goal)
   }
 
-  lazy val definition = "(:" ~> defIdent ~ rep(definitionAttr) <~ ")" ^^ {
-    case defn ~ attrs =>
-      defn match {
-        case (dname, name: String) if dname == "action" => attrs match {
-          case List((":precond", precond), (":effect", effect)) => Some(LogicAction(precond, effect, name))
-          case List((":effect", effect)) => Some(LogicAction(True, effect, name))
-          case _ => None
-        }
-      }
-    case _ => None
-  }
+  lazy val initDef = ("(:" ~> "init") ~> logicExpr <~ ")"
 
-  lazy val defIdent: Parser[Any] = "action" ~ ident ^^ (a => (a._1, a._2))
+  lazy val goalDef = ("(:" ~> "goal") ~> logicExpr <~ ")"
 
-  lazy val definitionAttr = defAttrKeyword ~ formula ^^ (a => (a._1, a._2))
-
-  lazy val defAttrKeyword = ":effect" | ":precond"
-
-  lazy val dsl = domain ~ problem ~ rep(definition) ^^ {
-    case Some(d) ~ Some(p) ~ list =>
-      val actions = list filter (_.isDefined) map { case Some(a) => a }
-      val actionMap = d.actions map { case (k, v) => (actions.find(_.name == k), v) }
-      actionMap.find(!_._1.isDefined) match {
-        case None => Some(PDDLDescription(Domain(d.name, d.predicates,
-          actionMap map (p => (p._1.get, p._2)), d.kbase), p))
-        case _ => None
-      }
+  lazy val pddl = domain ~ problem ^^ {
+    case d ~ p => Problem(p, d)
   }
 
   /**
    * Copied from BooleanFormulaParserCombinator
    */
 
-  val formula: PackratParser[BoolExp] =  term ~ ("&" ~> formula) ^^ {
+  lazy val formula: PackratParser[BoolExp] = term ~ ("&" ~> formula) ^^ {
     case f1 ~ f2 => f1 & f2
   } | term ~ ("|" ~> formula) ^^ {
     case f1 ~ f2 => f1 | f2
@@ -127,20 +92,29 @@ object PDDLParser extends StandardTokenParsers with PackratParsers {
     case f1 ~ f2 => f1 iff f2
   } | term
 
-  val term =  "~" ~> "(" ~> formula <~ ")" ^^ {
-    case f  => f.unary_~()
+  lazy val term = "~" ~> "(" ~> formula <~ ")" ^^ {
+    case f => f.unary_~()
   } | "(" ~> formula <~ ")" | lit
 
-  val lit: PackratParser[BoolExp] =  "~" ~> ident ^^ {
+  lazy val lit: PackratParser[BoolExp] = "~" ~> ident ^^ {
     case s => Symbol(s).unary_~()
-  } | ident ^^ {
+  } | unknown | ident ^^ {
     case s => Symbol(s): BoolExp
+  }
+
+  lazy val unknown = ident <~ "?" ^^ {
+    case s => Symbol(s) | ~Symbol(s): BoolExp
   }
 }
 
 class PDDLLexical extends StdLexical {
-  delimiters +=("(", "(:", ")", "=", "&", "|", "~", "->", "<->", ";")
-  reserved +=("define", "domain", "predicates", "actions", "kbase", "problem", "init", "goal", "action", ":effect", ":precond")
+  delimiters +=("(", "(:", ")", "=", "&", "|", "~", "->", "<->", "?", ":")
+  reserved +=("define", "domain", "predicates", "actions", "axiom", "problem", "init",
+    "goal", "action", "effect", "precondition")
 
-  override def identChar = super.identChar | elem(':')
+  override def whitespace: Parser[Any] = rep(whitespaceChar | comment)
+
+  protected override def comment: Parser[Any] = ';' ~ rep(chrExcept(EofCh, '\n'))
+
+  override def identChar = super.identChar | elem('-')
 }

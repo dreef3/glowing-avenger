@@ -1,7 +1,7 @@
 package com.glowingavenger.dialog
 
 import com.glowingavenger.agent.PlanTraversalListener
-import com.glowingavenger.plan.problem.{LogicAction, Question, Action, BeliefState}
+import com.glowingavenger.plan.model.{LogicAction, Question, Action, BeliefState}
 import com.glowingavenger.plan.ActionEdge
 import scala.collection.SortedSet
 

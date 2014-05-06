@@ -1,7 +1,7 @@
 package com.glowingavenger.plan.plan
 
 import org.sat4j.scala.Logic._
-import com.glowingavenger.plan.problem._
+import com.glowingavenger.plan.model._
 import com.glowingavenger.plan.{ContingencyPlan, PlanSpec}
 
 class ContingencyPlanSpec extends PlanSpec {

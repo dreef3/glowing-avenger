@@ -1,11 +1,20 @@
 (define (domain bulb)
-	(:predicates
-		(L="Лампа горит")
-		(B="Лампа исправна")
+	(: predicates
+		(L) ;Лампа горит
+		(B) ;Лампа исправна
+		(S) ;Выключатель включен
+		(C) ;Кондиционер включен
+		(W) ;Окно открыто
 	)
-	(:actions
-		(off_light="Выключить выключатель")
-		(on_light="Включить выключатель")
+
+	(: action off_light ;Выключить выключатель
+		:precondition (S?)
+		:effect (~S)
 	)
-	(:kbase (L <-> B & S))
+
+	(: action on_light ;Включить выключатель
+        :precondition (S?)
+        :effect (S & L?))
+
+	(:axiom (L <-> B & S))
 )

@@ -1,4 +1,4 @@
-package com.glowingavenger.plan.problem
+package com.glowingavenger.plan.model
 
 import org.sat4j.scala.Logic._
 import com.glowingavenger.plan.util.Model
@@ -11,6 +11,10 @@ object BeliefState {
       case None => throw new IllegalArgumentException("Unsatisfiable clause: " + PrettyPrint(clause))
     }
   }
+}
+
+object BeliefStateImplicits {
+  @inline implicit def boolExp2BeliefState(exp: BoolExp): BeliefState = BeliefState.fromBoolExp(exp)
 }
 
 class BeliefState(val attrs: Map[Symbol, Option[Boolean]]) {
@@ -66,12 +70,4 @@ case class Answer(override val attrs: Map[Symbol, Option[Boolean]], attr: Symbol
 
   val yes = new BeliefState(attrs ++ Map(attr -> Some(true)))
   val no = new BeliefState(attrs ++ Map(attr -> Some(false)))
-}
-
-case class ProducedState(override val attrs: Map[Symbol, Option[Boolean]], producer: Action) extends BeliefState(attrs)
-
-object ProducedState {
-  @inline implicit def beliefState2ProducedState(state: BeliefState): ProducedState = {
-    new ProducedState(state.attrs, NoAction())
-  }
 }

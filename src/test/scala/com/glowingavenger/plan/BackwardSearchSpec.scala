@@ -1,7 +1,7 @@
 package com.glowingavenger.plan
 
 import org.sat4j.scala.Logic._
-import com.glowingavenger.plan.problem.LogicAction
+import com.glowingavenger.plan.model.LogicAction
 
 class BackwardSearchSpec extends PlanSpec {
   behavior of "Backward search"
@@ -47,7 +47,7 @@ class BackwardSearchSpec extends PlanSpec {
   it should "pass a more complex example" in new ProblemEnv {
     val algo = new BackwardSearch(List('L, 'S, 'B, 'N, 'D), actions, Some('L iff 'S & 'B))
 
-    val res = algo.search(init.asBoolExp, goal.asBoolExp)
+    val res = algo.search(init, goal)
     res shouldBe Some(Map('S -> None, 'L -> Some(false), 'B -> None))
   }
 }
