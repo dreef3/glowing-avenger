@@ -11,9 +11,9 @@ import scala.util.parsing.input.CharArrayReader
 
 case class Domain(name: String, predicates: Map[Symbol, String], actions: Map[LogicAction, String], kbase: List[BoolExp])
 
-case class Problem(name: String, domain: String, init: BoolExp, goal: BoolExp)
+case class ProblemStub(name: String, domain: String, init: BoolExp, goal: BoolExp)
 
-case class PDDLDescription(domain: Domain, problem: Problem)
+case class Problem(name: String, domain: Domain, init: BoolExp, goal: BoolExp)
 
 object PDDLParser extends StandardTokenParsers with PackratParsers {
 
@@ -68,7 +68,7 @@ object PDDLParser extends StandardTokenParsers with PackratParsers {
   lazy val problem = ("(" ~> "define" ~> "(" ~> "problem" ~> ident <~ ")") ~ (domainAttr ~ rep(problemKBaseAttr) <~ ")") ^^ {
     case name ~ attrs => attrs match {
         case Some(domainName) ~ List(Some(("init", init)), Some(("goal", goal))) =>
-          Some(Problem(name, domainName, init, goal))
+          Some(ProblemStub(name, domainName, init, goal))
         case _ => None
       }
     case _ => None
@@ -136,24 +136,6 @@ object PDDLParser extends StandardTokenParsers with PackratParsers {
   } | ident ^^ {
     case s => Symbol(s): BoolExp
   }
-
-  def main(args: Array[String]) {
-    /*println(attr(new PackratReader(new lexical.Scanner("(L=\"Лампа горит\")"))))
-    println(kbaseAttr(new PackratReader(new lexical.Scanner("(\"L <-> B & S\")"))))
-    println(kbase(new PackratReader(new lexical.Scanner("(:kbase (\"L <-> B & S\"))"))))
-    println(actions(new PackratReader(new lexical.Scanner("(:actions\n\t\t(off_light=\"Выключить выключатель\") (on_light=\"Включить выключатель\") (ch_bulb=\"Заменить лампу\") (off_cond=\"Выключить кондиционер\") (on_cond=\"Включить кондиционер\") (off_wind=\"Закрыть окно\") (on_wind=\"Открыть окно\"))"))))
-    println(predicates(new PackratReader(new lexical.Scanner("(:predicates\n\t\t(L=\"Лампа горит\") (B=\"Лампа исправна\") (S=\"Выключатель включен\") (C=\"Кондиционер включен\") (W=\"Окно открыто\"))"))))
-    println(domain(new PackratReader(new lexical.Scanner("(define (domain bulb)\n\t(:predicates\n\t\t(L=\"Лампа горит\")(B=\"Лампа исправна\")(S=\"Выключатель включен\")(C=\"Кондиционер включен\")(W=\"Окно открыто\")\n\t)\n\t(:actions\n\t\t(off_light=\"Выключить выключатель\")(on_light=\"Включить выключатель\")(ch_bulb=\"Заменить лампу\")(off_cond=\"Выключить кондиционер\")(on_cond=\"Включить кондиционер\")(off_wind=\"Закрыть окно\")(on_wind=\"Открыть окно\"))\n\t(:kbase (\"L <-> B & S\"))\n)"))))
-    println(domainAttr(new PackratReader(new lexical.Scanner("(:domain bulb)"))))
-    println(problemKBaseAttr(new PackratReader(new lexical.Scanner("(: init (\"~L\"))"))))
-    println(problem(new PackratReader(new lexical.Scanner("(define (problem switch_on)\n\t(: domain bulb)\n\t(: init (\"~L\"))\n\t(: goal (\"L\")))"))))
-    println(definitionAttr(new PackratReader(new lexical.Scanner(":effect (\"~S\")"))))
-    println(definition(new PackratReader(new lexical.Scanner("(: action ch_bulb :precond (\"~S\") :effect (\"B\"))"))))
-    println(dsl(new PackratReader(new lexical.Scanner("(define (domain bulb)\n\t(:predicates\n\t\t(L=\"Лампа горит\")(B=\"Лампа исправна\")(S=\"Выключатель включен\")(C=\"Кондиционер включен\")(W=\"Окно открыто\")\n\t)\n\t(:actions\n\t\t(off_light=\"Выключить выключатель\")(on_light=\"Включить выключатель\")(ch_bulb=\"Заменить лампу\")(off_cond=\"Выключить кондиционер\")(on_cond=\"Включить кондиционер\")(off_wind=\"Закрыть окно\")(on_wind=\"Открыть окно\"))\n\t(:kbase (\"L <-> B & S\"))\n) (define (problem switch_on)\n\t(:domain bulb)\n\t(:init (\"~L\"))\n\t(:goal (\"L\"))) (: action ch_bulb :precond (\"~S\") :effect (\"B\"))"))))*/
-    val str = Source.fromFile("src/main/resources/Bulb.pddl").mkString
-    println(dsl(new PackratReader(new lexical.Scanner(str))))
-  }
-
 }
 
 class PDDLLexical extends StdLexical {

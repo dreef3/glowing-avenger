@@ -1,9 +1,6 @@
-package com.glowingavenger.plan.util
+package com.glowingavenger.plan.importexport
 
-import scalax.collection.Graph
-import scalax.collection.edge.WLDiEdge
 import com.glowingavenger.plan.problem.{Action, BeliefState}
-import scalax.collection.io.dot._
 import org.jgrapht.DirectedGraph
 import org.jgrapht.graph.{DefaultEdge, DefaultDirectedWeightedGraph}
 import java.util

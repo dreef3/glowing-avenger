@@ -15,7 +15,7 @@
 		(off_wind="Закрыть окно")
 		(on_wind="Открыть окно")
 	)
-	(:kbase (L <->> B & S))
+	(:kbase (L <-> B & S))
 )
 
 (define (problem switch_on)

@@ -37,6 +37,6 @@ class SimpleSwingDialogAgent extends AbstractDialogAgent with ChooseFirstQuestio
 
 object SwingExample {
   def main(args: Array[String]) {
-    new PlanExecutor(PDDLProblem.lampProblem(), new SimpleSwingDialogAgent).act()
+    new PlanExecutor(PDDLProblem.lampProblem(), new SimpleSwingDialogAgent).exec()
   }
 }

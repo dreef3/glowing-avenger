@@ -1,6 +1,5 @@
 package com.glowingavenger.agent
 
-import scala.actors.Actor
 import com.glowingavenger.plan.problem.{BeliefState, PDDLProblem}
 import com.glowingavenger.plan.{ActionEdge, ContingencyPlan}
 import scala.collection.JavaConversions._
@@ -14,8 +13,8 @@ trait PlanTraversalListener {
   def onFailure(state: BeliefState, producer: Option[ActionEdge])
 }
 
-class PlanExecutor(problem: PDDLProblem, listener: PlanTraversalListener) extends Actor {
-  override def act() {
+class PlanExecutor(problem: PDDLProblem, listener: PlanTraversalListener) {
+  def exec() {
     val plan = ContingencyPlan.build(problem)
 
     def doAct(before: Option[BeliefState], state: BeliefState, producer: Option[ActionEdge]) {
