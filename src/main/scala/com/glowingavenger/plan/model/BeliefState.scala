@@ -4,17 +4,19 @@ import org.sat4j.scala.Logic._
 import com.glowingavenger.plan.util.Model
 
 object BeliefState {
-  def fromBoolExp(clause: BoolExp, attrs: Iterable[Symbol] = Nil): BeliefState = {
+  def apply(clause: BoolExp, attrs: Iterable[Symbol] = Nil): BeliefState = {
     val unknowns = attrs.map(attr => (attr, None.asInstanceOf[Option[Boolean]])).toMap
     Model.retrieveModels(clause) match {
-      case Some(clauseAttrs) => new BeliefState(unknowns ++ clauseAttrs)
+      case Some(clauseAttrs) => BeliefState(unknowns ++ clauseAttrs)
       case None => throw new IllegalArgumentException("Unsatisfiable clause: " + PrettyPrint(clause))
     }
   }
+  
+  def apply(attrs: Map[Symbol, Option[Boolean]]): BeliefState = new BeliefState(attrs)
 }
 
 object BeliefStateImplicits {
-  @inline implicit def boolExp2BeliefState(exp: BoolExp): BeliefState = BeliefState.fromBoolExp(exp)
+  @inline implicit def boolExp2BeliefState(exp: BoolExp): BeliefState = BeliefState.apply(exp)
 }
 
 class BeliefState(val attrs: Map[Symbol, Option[Boolean]]) {

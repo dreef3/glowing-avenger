@@ -2,11 +2,12 @@ package com.glowingavenger.plan.model
 
 import org.scalatest.{Matchers, FlatSpec}
 import org.sat4j.scala.Logic._
+import com.glowingavenger.plan.model.action.LogicAction
 
 class LogicActionSpec extends FlatSpec with Matchers {
   behavior of "Logic Action"
 
-  val state = BeliefState.fromBoolExp('A & 'B & ~'C)
+  val state = BeliefState.apply('A & 'B & ~'C)
 
   it should "throw an exception when effect or precondition aren't satisfiable" in {
     an [IllegalArgumentException] should be thrownBy {
@@ -44,6 +45,6 @@ class LogicActionSpec extends FlatSpec with Matchers {
     val action = LogicAction('A, ~'A)
 
     action.applicableIn(state) shouldBe true
-    action.result(state) shouldBe BeliefState.fromBoolExp(~'A & 'B & ~'C)
+    action.result(state) shouldBe BeliefState.apply(~'A & 'B & ~'C)
   }
 }

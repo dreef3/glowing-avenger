@@ -2,13 +2,14 @@ package com.glowingavenger.plan.importexport
 
 import scala.util.parsing.combinator.syntactical.StandardTokenParsers
 import scala.util.parsing.combinator.lexical.StdLexical
-import org.sat4j.scala.Logic.{True, BoolExp}
+import org.sat4j.scala.Logic.BoolExp
 import org.sat4j.scala.Logic.identFromSymbol
-import com.glowingavenger.plan.model.{Problem, UnboundProblem, Domain, LogicAction}
+import com.glowingavenger.plan.model.{Problem, UnboundProblem, Domain}
 import scala.util.parsing.combinator.PackratParsers
 import scala.util.parsing.input
 import input.CharArrayReader.EofCh
 import scala.collection.mutable.ArrayBuffer
+import com.glowingavenger.plan.model.action.LogicAction
 
 object PDDL {
   import PDDLParser._
@@ -39,7 +40,7 @@ private[importexport] object PDDLParser extends StandardTokenParsers with Packra
         case Left(action: LogicAction) => actions += action
         case Right(axiom: BoolExp) => axioms += axiom
       }
-      Domain(name, predicates, actions.toList, axioms.toList)
+      Domain(predicates, actions.toList, axioms.toList, name)
   }
 
   lazy val predicatesDef = ("(:" ~> "predicates") ~> (rep(predicate) <~ ")")
@@ -67,7 +68,7 @@ private[importexport] object PDDLParser extends StandardTokenParsers with Packra
   lazy val logicExpr = "(" ~> formula <~ ")"
 
   lazy val problem = ("(" ~> "define" ~> "(" ~> "problem" ~> ident <~ ")") ~ ("(:" ~> "domain" ~> ident <~ ")") ~ initDef ~ goalDef <~ ")" ^^ {
-    case name ~ domainName ~ init ~ goal => UnboundProblem(name, domainName, init, goal)
+    case name ~ domainName ~ init ~ goal => UnboundProblem(domainName, init, goal, name)
   }
 
   lazy val initDef = ("(:" ~> "init") ~> logicExpr <~ ")"
@@ -107,7 +108,7 @@ private[importexport] object PDDLParser extends StandardTokenParsers with Packra
   }
 }
 
-class PDDLLexical extends StdLexical {
+private[importexport] class PDDLLexical extends StdLexical {
   delimiters +=("(", "(:", ")", "=", "&", "|", "~", "->", "<->", "?", ":")
   reserved +=("define", "domain", "predicates", "actions", "axiom", "problem", "init",
     "goal", "action", "effect", "precondition")

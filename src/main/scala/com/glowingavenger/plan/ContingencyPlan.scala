@@ -1,12 +1,31 @@
 package com.glowingavenger.plan
 
+import com.glowingavenger.plan.impl._
+import com.glowingavenger.plan.model.Problem
+
+class ContingencyPlan(override val problem: Problem) extends AbstractPlanner
+with BackwardSearchInit with DefaultAxioms with GuaranteedPathSuccessors with QuestionSuccessors {
+
+}
+
+object ContingencyPlan {
+  def apply(problem: Problem) = new ContingencyPlan(problem).build()
+}
+
+/*
+package com.glowingavenger.plan
+
 import com.glowingavenger.plan.model._
 import scala.collection.immutable.Queue
-import com.glowingavenger.plan.util.ASearch
+import com.glowingavenger.plan.util.{ReachGraph, ASearch}
 import org.jgrapht.DirectedGraph
 import org.jgrapht.graph.{DefaultDirectedGraph, DefaultEdge}
-import scala.collection.JavaConversions._
 import ReachGraph.graphToReachGraph
+import org.sat4j.scala.Logic.True
+import com.glowingavenger.plan.model.Answer
+import scala.Some
+import com.glowingavenger.plan.model.action.{NoAction, LogicAction, Action, Question}
+import com.glowingavenger.plan.impl.BackwardSearch
 
 object ContingencyPlan {
   def apply(problem: Problem) = new ContingencyPlan(problem)
@@ -14,9 +33,9 @@ object ContingencyPlan {
   def build(problem: Problem) = ContingencyPlan(problem).build()
 }
 
-case class ActionEdge(from: BeliefState, to: BeliefState, action: Action) extends DefaultEdge
 
-case class PlanDescription(init: BeliefState, plan: DirectedGraph[BeliefState, ActionEdge], problem: Problem)
+
+
 
 class ContingencyPlan(val problem: Problem) {
   val guaranteed = new ASearch[(BeliefState, Action)] {
@@ -33,9 +52,13 @@ class ContingencyPlan(val problem: Problem) {
     } yield (applyAxioms(result), action)
   }
 
+  // TODO This is a naive approach that would work only with a single axiom
+  val axiom = if (problem.domain.axioms.isEmpty) True
+  else (problem.domain.axioms.head /: problem.domain.axioms.tail)(_ & _)
+
   val backward = new BackwardSearch(problem.domain.predicates,
     for (a <- problem.domain.actions if a.isInstanceOf[LogicAction]) yield a.asInstanceOf[LogicAction],
-    Some(problem.domain.axioms.head)) // TODO Handle multiple axioms
+    Some(axiom))
 
   def build(): PlanDescription = {
     val init = backward.search(problem.init, problem.goal) match {
@@ -60,7 +83,7 @@ class ContingencyPlan(val problem: Problem) {
   }
 
   private def pathToGoal(state: BeliefState, producer: Action = NoAction()) = {
-    guaranteed.search((state, producer), (BeliefState.fromBoolExp(problem.goal), NoAction())) match {
+    guaranteed.search((state, producer), (BeliefState.apply(problem.goal), NoAction())) match {
       case Some(path) => path2Edges(path)
       case None => Nil
     }
@@ -80,49 +103,22 @@ class ContingencyPlan(val problem: Problem) {
   }
 
   private def applyAxioms(state: BeliefState): BeliefState = {
-    BeliefState.fromBoolExp(state.asBoolExp & problem.domain.axioms.head, state.attrs.keys)
+    BeliefState.apply(state.asBoolExp & axiom, state.attrs.keys)
   }
 
   private def questionSuccessors(state: BeliefState): List[(BeliefState, Action)] = {
     state.unknown.map(Question).map {
-      ask =>
-        ask.result(state) match {
-          case a: Answer => (applyAxioms(a.yes), ask) ::(applyAxioms(a.no), ask) :: Nil
+      question =>
+        question.result(state) match {
+          case a: Answer => (applyAxioms(a.yes), question) ::(applyAxioms(a.no), question) :: Nil
           case _ => Nil
         }
     }.flatten
   }
 }
 
-class ReachGraph(g: DirectedGraph[BeliefState, ActionEdge]) {
-  def +++(other: DirectedGraph[BeliefState, ActionEdge]): DirectedGraph[BeliefState, ActionEdge] = {
-    val newGraph = new DefaultDirectedGraph[BeliefState, ActionEdge](classOf[ActionEdge])
-    for (v <- g.vertexSet()) newGraph.addVertex(v)
-    for (v <- other.vertexSet()) newGraph.addVertex(v)
-    for (e <- g.edgeSet()) newGraph.addEdge(e.from, e.to, e)
-    for (e <- other.edgeSet()) newGraph.addEdge(e.from, e.to, e)
-    newGraph
-  }
 
-  def ++(edges: Iterable[ActionEdge]): DirectedGraph[BeliefState, ActionEdge] = {
-    val newGraph = g +++ new DefaultDirectedGraph[BeliefState, ActionEdge](classOf[ActionEdge])
-    for (e <- edges) {
-      newGraph.addVertex(e.from)
-      newGraph.addVertex(e.to)
-      newGraph.addEdge(e.from, e.to, e)
-    }
-    newGraph
-  }
 
-  def +(edge: ActionEdge): DirectedGraph[BeliefState, ActionEdge] = {
-    val newGraph = g +++ new DefaultDirectedGraph[BeliefState, ActionEdge](classOf[ActionEdge])
-    newGraph.addVertex(edge.from)
-    newGraph.addVertex(edge.to)
-    newGraph.addEdge(edge.from, edge.to, edge)
-    newGraph
-  }
-}
 
-object ReachGraph {
-  @inline implicit def graphToReachGraph(g: DirectedGraph[BeliefState, ActionEdge]): ReachGraph = new ReachGraph(g)
-}
+
+ */

@@ -3,7 +3,6 @@ package parser
 import scala.util.parsing.combinator.PackratParsers
 import scala.util.parsing.combinator.syntactical.StandardTokenParsers
 import org.sat4j.scala.Logic._
-import scala.annotation.migration
 
 object BooleanFormulaParserCombinator extends StandardTokenParsers with PackratParsers {
 

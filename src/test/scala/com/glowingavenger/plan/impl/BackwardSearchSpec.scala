@@ -1,7 +1,8 @@
-package com.glowingavenger.plan
+package com.glowingavenger.plan.impl
 
 import org.sat4j.scala.Logic._
-import com.glowingavenger.plan.model.LogicAction
+import com.glowingavenger.plan.model.action.LogicAction
+import com.glowingavenger.plan.PlanSpec
 
 class BackwardSearchSpec extends PlanSpec {
   behavior of "Backward search"
@@ -13,6 +14,11 @@ class BackwardSearchSpec extends PlanSpec {
 
     val res = agent.search(init, goal)
     res shouldBe None
+  }
+
+  it should "respect unknown symbols in init" in {
+    val search = new BackwardSearch(List('A, 'B), Nil, None)
+    search.search('A.? & 'B, 'A) shouldBe Some(Map('A -> None, 'B -> Some(true)))
   }
 
   it should "return symbols when goal matches init" in {

@@ -1,10 +1,9 @@
 package com.glowingavenger.agent
 
-import com.glowingavenger.plan.model.{Problem, BeliefState, PlanProblem}
+import com.glowingavenger.plan.model.{Problem, BeliefState}
 import com.glowingavenger.plan.{ActionEdge, ContingencyPlan}
-import scala.collection.JavaConversions._
-import scala.collection.mutable
 import com.glowingavenger.plan.model.BeliefStateImplicits._
+import com.glowingavenger.plan.util.ReachGraph._
 
 trait PlanTraversalListener {
   def onStateChange(before: Option[BeliefState], state: BeliefState,
@@ -16,13 +15,13 @@ trait PlanTraversalListener {
 
 class PlanExecutor(problem: Problem, listener: PlanTraversalListener) {
   def exec() {
-    val plan = ContingencyPlan.build(problem)
+    val plan = ContingencyPlan(problem)
 
     def doAct(before: Option[BeliefState], state: BeliefState, producer: Option[ActionEdge]) {
       if (problem.goal includes state) {
         listener.onFinish(state, producer)
       } else {
-        val successors: mutable.Set[ActionEdge] = plan.plan.outgoingEdgesOf(state)
+        val successors = plan.plan <<>> state
         if (successors.isEmpty) {
           listener.onFailure(state, producer)
         } else {

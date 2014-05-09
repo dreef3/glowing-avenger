@@ -1,9 +1,5 @@
 package org.sat4j.scala
 
-import Logic.PrettyPrint
-import Logic.True
-import Logic.identFromString
-
 
 object Main extends App{
 	import Logic._

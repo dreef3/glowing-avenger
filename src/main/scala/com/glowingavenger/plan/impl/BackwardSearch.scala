@@ -1,9 +1,9 @@
-package com.glowingavenger.plan
+package com.glowingavenger.plan.impl
 
 import org.sat4j.scala.Logic._
 import com.glowingavenger.plan.util.Model
 import Model._
-import com.glowingavenger.plan.model.LogicAction
+import com.glowingavenger.plan.model.action.LogicAction
 
 class BackwardSearch(val attrs: List[Symbol], val actions: List[LogicAction], kb: Option[BoolExp]) {
 
@@ -25,7 +25,7 @@ class BackwardSearch(val attrs: List[Symbol], val actions: List[LogicAction], kb
     val clause = axiom & init & goal
     retrieveModels(clause) match {
       case None => backwardAction(init, goal)
-      case something => something
+      case Some(model) => retrieveSymbols(model, axiom & init)
     }
   }
 

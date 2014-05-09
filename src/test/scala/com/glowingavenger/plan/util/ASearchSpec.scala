@@ -1,8 +1,9 @@
 package com.glowingavenger.plan.util
 
 import org.scalatest.{Matchers, FlatSpec}
-import com.glowingavenger.plan.model.{NoAction, Action, LogicAction, BeliefState}
+import com.glowingavenger.plan.model.BeliefState
 import org.sat4j.scala.Logic._
+import com.glowingavenger.plan.model.action.{NoAction, LogicAction, Action}
 
 class ASearchSpec extends FlatSpec with Matchers {
   behavior of "A* Search"
