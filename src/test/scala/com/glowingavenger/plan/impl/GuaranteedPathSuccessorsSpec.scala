@@ -2,7 +2,7 @@ package com.glowingavenger.plan.impl
 
 import com.glowingavenger.plan.{ActionEdge, PlanSpec}
 import org.sat4j.scala.Logic._
-import com.glowingavenger.plan.model.state.{BeliefState, BeliefStateImplicits}
+import com.glowingavenger.plan.model.state.BeliefStateImplicits
 import BeliefStateImplicits._
 
 class GuaranteedPathSuccessorsSpec extends PlanSpec {

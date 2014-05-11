@@ -6,7 +6,7 @@ import com.glowingavenger.plan.model.state.BeliefState
 trait Axioms {
   /**
    * Produces a function which chooses the axiom from the list for given belief states
-   * @param axioms
+   * @param axioms list of axioms to choose from
    * @return axiom boolean expression
    */
   protected def axiom(axioms: Iterable[BoolExp]): (Iterable[BeliefState] => BoolExp)

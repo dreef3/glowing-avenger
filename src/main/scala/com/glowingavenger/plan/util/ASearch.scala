@@ -1,6 +1,7 @@
 package com.glowingavenger.plan.util
 
 import scala.collection.mutable.Set
+import scala.collection.mutable
 
 /**
  * Special version of A* Search algorithm for the case when graph is dynamically generated on the fly.
@@ -25,10 +26,10 @@ trait ASearch[N] {
 
   def search(init: N, goal: N): Option[List[N]] = {
     def successorNodes(node: Node) = {
-      Set(successors(node.v).map(new Node(_, hCost(node.v, goal), Some(node))): _*)
+      mutable.Set(successors(node.v).map(new Node(_, hCost(node.v, goal), Some(node))): _*)
     }
 
-    def doSearch(frontier: Set[Node], explored: Set[Node], goal: N): Option[List[N]] = {
+    def doSearch(frontier: mutable.Set[Node], explored: mutable.Set[Node], goal: N): Option[List[N]] = {
       if (frontier.isEmpty)
         None
       else {
@@ -56,7 +57,7 @@ trait ASearch[N] {
       }
     }
 
-    doSearch(Set(new Node(init, hCost(init, goal), None)), Set[Node](), goal)
+    doSearch(mutable.Set(new Node(init, hCost(init, goal), None)), mutable.Set[Node](), goal)
   }
 
   private def solution(node: Node): List[N] = {

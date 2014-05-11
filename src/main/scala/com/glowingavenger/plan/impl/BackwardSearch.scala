@@ -46,9 +46,8 @@ class BackwardSearch(val attrs: List[Symbol], val actions: List[LogicAction], kb
     } else {
       backwardAction(init, satGoalModels.head._3.precond) match {
         case None => None
-        case something => {
+        case something =>
           something
-        }
       }
     }
   }

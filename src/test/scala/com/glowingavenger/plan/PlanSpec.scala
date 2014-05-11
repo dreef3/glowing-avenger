@@ -4,7 +4,6 @@ import org.scalatest.{FlatSpec, Matchers}
 import com.glowingavenger.plan.importexport.PDDL
 import scala.io.Source
 import com.glowingavenger.plan.model.state.BeliefState
-import com.glowingavenger.plan.model.state.BeliefStateImplicits._
 import org.sat4j.scala.Logic._
 
 abstract class PlanSpec extends FlatSpec with Matchers {

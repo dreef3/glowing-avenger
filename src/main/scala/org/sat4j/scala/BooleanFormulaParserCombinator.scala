@@ -1,4 +1,4 @@
-package parser
+package org.sat4j.scala
 
 import scala.util.parsing.combinator.PackratParsers
 import scala.util.parsing.combinator.syntactical.StandardTokenParsers
@@ -18,7 +18,7 @@ object BooleanFormulaParserCombinator extends StandardTokenParsers with PackratP
     
   def scala2JavaList(sl: List[String]): java.util.List[String] = {
     var jl = new java.util.ArrayList[String]()
-    sl.foreach(jl.add(_))
+    sl.foreach(jl.add)
     jl
   }
   
@@ -40,13 +40,13 @@ object BooleanFormulaParserCombinator extends StandardTokenParsers with PackratP
   } | term
   
   val term =  "~" ~> "(" ~> formula <~ ")" ^^ {
-    case f  => f.unary_~
+    case f  => f.unary_~()
   } | "(" ~> formula <~ ")" | lit
 
   val lit: PackratParser[BoolExp] =  "~" ~> ident ^^ {
-    case s => (Symbol(s)).unary_~
+    case s => Symbol(s).unary_~()
   } | ident ^^ {
-    case s => (Symbol(s):BoolExp)
+    case s => Symbol(s): BoolExp
   } 
     
   /**
@@ -59,7 +59,7 @@ object BooleanFormulaParserCombinator extends StandardTokenParsers with PackratP
     case Success(ord, _) => ord map(f => (PrettyPrint(f), f toCnfList context))
     case Failure(msg, _) => msg :: List()
     case Error(msg, _) => msg :: List()
-    case p => p.toString() :: List() 
+    case p => p.toString :: List()
   }
   }
   

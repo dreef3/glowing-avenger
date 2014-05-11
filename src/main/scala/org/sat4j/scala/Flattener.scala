@@ -45,7 +45,7 @@ class FlatCardExact(literals: List[Literal], k:Int) extends FlatConstraint {
 /** A system in conjunctive normal form, also stores the mapping from identifiers to literals (immutable attributes). */
 case class CNFSystem(constraints: List[FlatConstraint], identifierMap: immutable.HashMap[Identifier, Literal]) {
   override def toString = {
-    val s1 = (identifierMap map { x => x.toString }).mkString("\n")
+    val s1 = (identifierMap map { x => x.toString() }).mkString("\n")
     val s2 = (constraints map { x => x.toString }).mkString("\n")
     "IdentifierMap:\n" + s1 + "\nConstraints:\n" + s2
   }
@@ -86,13 +86,11 @@ class Flattener {
 	def apply(e: BoolExp):Literal = boolExpCache.getOrElseUpdate(e, _translate(e))
 
 	private[this] def _translate(e: BoolExp):Literal = e match {
-	  case True => {
-		  PositiveLiteral(0)
-	  }
-	  case False => {
-		  NegativeLiteral(0)
-	  }
-//	  case ident@Ident(s) => {
+	  case True =>
+      PositiveLiteral(0)
+    case False =>
+      NegativeLiteral(0)
+    //	  case ident@Ident(s) => {
 //		  val x = newLiteral
 //		  identifierMap += (ident -> x)
 //		  x

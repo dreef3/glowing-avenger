@@ -32,11 +32,10 @@ object Logic {
     def apply(cnfList: List[List[BoolExp]]): String =
       cnfList match {
         case Nil => "";
-        case c :: t => {
+        case c :: t =>
           val line =
             for (l <- c) yield apply(l)
           "\n" + (line mkString " ") + apply(t)
-        }
       }
 
   }
@@ -73,12 +72,11 @@ object Logic {
     def toCnfList(context: Context) = {
       isAlreadyInCnf(this) match {
         case (true, Some(x)) => x
-        case _ => {
+        case _ =>
           val next = context.nextAnonymousVar
           val translated = tseitinListSimple(this, List(), context)._2
           assert(!(context._createdVars isEmpty))
           List(next) :: translated
-        }
       }
     }
 
@@ -181,19 +179,19 @@ object Logic {
   }
 
   class Context {
-    private var _varId = 0;
+    private var _varId = 0
 
     def nextVarId = {
-      _varId += 1;
+      _varId += 1
       _varId
-    };
+    }
 
     var _createdVars = List[AnonymousVariable]()
 
     /** create new propositional variables for translation into CNF */
     def newVar = if (_cachedVar != null) {
-      val tmp = _cachedVar;
-      _cachedVar = null;
+      val tmp = _cachedVar
+      _cachedVar = null
       tmp
     } else uncachedNewVar
 
@@ -204,13 +202,13 @@ object Logic {
     }
 
     def nextAnonymousVar = if (_cachedVar == null) {
-      _cachedVar = uncachedNewVar;
+      _cachedVar = uncachedNewVar
       _cachedVar
-    } else _cachedVar;
+    } else _cachedVar
 
     private var _cachedVar = uncachedNewVar
 
-    def init = {
+    def init() {
       _varId = 0
       _createdVars = List()
       _cachedVar = uncachedNewVar
@@ -252,27 +250,25 @@ object Logic {
 
   /** Returns true iff the given expression is already in conjunctive normal form. */
   private def isAlreadyInCnf(f: BoolExp): (Boolean, Option[List[List[BoolExp]]]) = f match {
-    case And(b1, b2) => {
+    case And(b1, b2) =>
       val (r1, l1) = isAlreadyInCnf(b1)
       if (r1) {
         val (r2, l2) = isAlreadyInCnf(b2)
         if (r2) (true, Some(l1.get ++ l2.get))
         else (false, None)
       } else (false, None)
-    }
     case Or(b1, b2) => isDisjunction(f)
     case _ => isLiteral(f)
   }
 
   private def isDisjunction(f: BoolExp): (Boolean, Option[List[List[BoolExp]]]) = f match {
-    case Or(b1, b2) => {
+    case Or(b1, b2) =>
       val (r1, l1) = isDisjunction(b1)
       if (r1) {
         val (r2, l2) = isDisjunction(b2)
         if (r2) (true, Some(List(l1.get(0) ++ l2.get(0))))
         else (false, None)
       } else (false, None)
-    }
     case _ => isLiteral(f)
   }
 
@@ -295,42 +291,36 @@ object Logic {
 
       case Ident(s) => (Ident(s), List())
 
-      case IndexedIdent(s, l) => (IndexedIdent(s, l), List())
+      case IndexedIdent(s, i) => (IndexedIdent(s, i), List())
 
-      case Not(b1) => {
+      case Not(b1) =>
         val v = context.newVar
         val t1 = tseitinListSimple(b1, List(), context)
         (v, List(~t1._1, ~v) :: List(t1._1, v) :: t1._2)
-      }
 
-      case And(b1, b2) => {
+      case And(b1, b2) =>
         val v = context.newVar
         val t1 = tseitinListSimple(b1, List(), context)
         val t2 = tseitinListSimple(b2, List(), context)
         (v, List(~t1._1, ~t2._1, v) :: List(t1._1, ~v) :: List(t2._1, ~v) :: t1._2 ++ t2._2)
 
-      }
-
-      case Or(b1, b2) => {
+      case Or(b1, b2) =>
         val v = context.newVar
         val t1 = tseitinListSimple(b1, List(), context)
         val t2 = tseitinListSimple(b2, List(), context)
         (v, List(t1._1, t2._1, ~v) :: List(~t1._1, v) :: List(~t2._1, v) :: t1._2 ++ t2._2)
-      }
 
-      case Implies(b1, b2) => {
+      case Implies(b1, b2) =>
         val v = context.newVar
         val t1 = tseitinListSimple(b1, List(), context)
         val t2 = tseitinListSimple(b2, List(), context)
         (v, List(~t1._1, t2._1, ~v) :: List(t1._1, v) :: List(~t2._1, v) :: t1._2 ++ t2._2)
-      }
 
-      case Iff(b1, b2) => {
+      case Iff(b1, b2) =>
         val v = context.newVar
         val t1 = tseitinListSimple(b1, List(), context)
         val t2 = tseitinListSimple(b2, List(), context)
         (v, List(~t1._1, t2._1, ~v) :: List(t1._1, ~t2._1, ~v) :: List(t1._1, t2._1, v) :: List(~t1._1, ~t2._1, v) :: t1._2 ++ t2._2)
-      }
     }
   }
 
@@ -345,18 +335,17 @@ object Logic {
 
   def simplifyCnf(l: List[List[BoolExp]]): List[List[BoolExp]] = l match {
     case Nil => List()
-    case h :: t => {
+    case h :: t =>
       val s = simplifyClause(h)
       s match {
         case List() => List(List())
         case List(True) => simplifyCnf(t)
         case _ => s :: simplifyCnf(t)
       }
-    }
   }
 
   def encode(cnf: BoolExp, context: Context): (List[List[Int]], Map[BoolExp, Int]) = {
-    context.init
+    context.init()
     encode(simplifyCnf(cnf.toCnfList(context)))
   }
 
@@ -388,16 +377,14 @@ object Logic {
 
   private def encodeCnf0(cnf: List[List[BoolExp]], m: Map[BoolExp, Int]): (List[List[Int]], Map[BoolExp, Int]) = cnf match {
     case Nil => (List(), m)
-    case h :: t => {
+    case h :: t =>
       val p = encodeClause0(h, m)
       p match {
         case (Nil, _) => (List(List()), m)
-        case (l, mUpdated) => {
+        case (l, mUpdated) =>
           val cnfT = encodeCnf0(t, mUpdated)
           (l :: cnfT._1, cnfT._2)
-        }
       }
-    }
   }
 
   private def inv(x: Int): Int = -x
@@ -415,15 +402,13 @@ object Logic {
   }
 
   def encodeClause1(c: BoolExp, q: List[BoolExp], m: Map[BoolExp, Int], f: Int => Int): (List[Int], Map[BoolExp, Int]) = m.get(c) match {
-    case Some(i) => {
+    case Some(i) =>
       val p = encodeClause0(q, m)
       (f(i) :: p._1, p._2)
-    }
-    case None => {
+    case None =>
       val n = m.size + 1
       val p = encodeClause0(q, m.updated(c, n))
       (f(n) :: p._1, p._2)
-    }
   }
 
   def isSat[U](f: BoolExp): (Boolean, Option[Map[U, Boolean]]) = {
@@ -438,9 +423,8 @@ object Logic {
       }
       val res = problem.solve
       res match {
-        case Satisfiable => {
+        case Satisfiable =>
           (true, Some(modelToMap(problem.model, mapRev)))
-        }
         case Unsatisfiable => (false, None)
         case _ => throw new IllegalStateException("Got a time out")
       }
@@ -451,17 +435,17 @@ object Logic {
 
   def modelToMap[U](model: Array[Int], mapRev: Map[Int, BoolExp]): Map[U, Boolean] = {
     val listeBoolExp = model.toList map {
-      x => if (x > 0) (mapRev(x) -> true) else (mapRev(-x) -> false)
+      x => if (x > 0) mapRev(x) -> true else mapRev(-x) -> false
     }
-    val mapIdentBool = listeBoolExp filter (x => x match {
+    val mapIdentBool = listeBoolExp filter {
       case (s: AnonymousVariable, _) => false
       case (Ident(s), _) => true
       case _ => false
-    })
-    val mapUBool = mapIdentBool map (z => z match {
+    }
+    val mapUBool = mapIdentBool map {
       case (Ident(s: U), b) => (s, b)
       case _ => throw new IllegalStateException
-    })
+    }
     mapUBool.toMap
   }
 
@@ -482,19 +466,17 @@ object Logic {
       }
       val res = problem.enumerate
       res match {
-        case (Satisfiable, list) => {
+        case (Satisfiable, list) =>
           val resList: List[Map[U, Boolean]] = list map {
             a => modelToMap[U](a, mapRev)
           }
           (true, Some(resList))
-        }
         case (Unsatisfiable, list) => (false, None)
-        case (Unknown, list) => {
+        case (Unknown, list) =>
           val resList: List[Map[U, Boolean]] = list map {
             a => modelToMap[U](a, mapRev)
           }
           (false, Some(resList))
-        }
       }
     } catch {
       case e: ContradictionException => (false, None)

@@ -1,7 +1,7 @@
 package com.glowingavenger.plan
 
 import org.jgrapht.DirectedGraph
-import com.glowingavenger.plan.model.action.{Question, LogicAction, Action}
+import com.glowingavenger.plan.model.action.{Question, Action}
 import org.jgrapht.graph.DefaultEdge
 import com.glowingavenger.plan.model.state.BeliefState
 import com.glowingavenger.plan.model.Problem

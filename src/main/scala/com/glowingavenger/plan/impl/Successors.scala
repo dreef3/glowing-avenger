@@ -1,6 +1,5 @@
 package com.glowingavenger.plan.impl
 
-import com.glowingavenger.plan.model._
 import com.glowingavenger.plan.util.ASearch
 import scala.Some
 import com.glowingavenger.plan.ActionEdge

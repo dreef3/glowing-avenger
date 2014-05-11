@@ -2,7 +2,7 @@ package com.glowingavenger.plan.util
 
 import org.jgrapht.DirectedGraph
 import com.glowingavenger.plan.ActionEdge
-import org.jgrapht.graph.{DirectedMultigraph, DefaultDirectedGraph}
+import org.jgrapht.graph.DirectedMultigraph
 import scala.collection.JavaConversions._
 import ReachGraph._
 import com.glowingavenger.plan.model.state.BeliefState

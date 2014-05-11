@@ -3,7 +3,7 @@ package org.sat4j.scala
 import org.sat4j.minisat.SolverFactory
 import org.sat4j.core.VecInt
 import org.sat4j.specs.IVecInt
-import org.sat4j.tools._;
+import org.sat4j.tools._
 
 abstract class Status {}
 case object Satisfiable extends Status {}
@@ -17,7 +17,7 @@ class Problem {
   /** Adds a clause in the problem. */
   def +=(clause: IVecInt) = {
     problem addClause clause
-    clause.clear
+    clause.clear()
     this
   }
 
