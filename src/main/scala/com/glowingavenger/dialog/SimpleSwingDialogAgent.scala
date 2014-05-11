@@ -7,8 +7,8 @@ import Dialog.Options._
 import Dialog.Result._
 import com.glowingavenger.agent.PlanExecutor
 import com.glowingavenger.plan.importexport.PDDL
-import com.glowingavenger.plan.model.BeliefState
 import com.glowingavenger.plan.model.action.{Question, Action}
+import com.glowingavenger.plan.model.state.BeliefState
 
 class SimpleSwingDialogAgent extends AbstractDialogAgent with ChooseFirstQuestion with ChooseFirstAction {
   override def onFinish(state: BeliefState, producer: Option[ActionEdge]) {

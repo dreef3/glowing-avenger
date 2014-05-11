@@ -90,6 +90,8 @@ object Logic {
       case Not(AnonymousVariable(c)) => Some(this.toString, false)
       case _ => None
     }
+
+    override def toString: String = PrettyPrint(this)
   }
 
   /** Base class for boolean constants True and False. */

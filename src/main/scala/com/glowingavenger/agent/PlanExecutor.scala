@@ -1,8 +1,9 @@
 package com.glowingavenger.agent
 
-import com.glowingavenger.plan.model.{Problem, BeliefState}
+import com.glowingavenger.plan.model.Problem
 import com.glowingavenger.plan.{ActionEdge, ContingencyPlan}
-import com.glowingavenger.plan.model.BeliefStateImplicits._
+import com.glowingavenger.plan.model.state.{BeliefState, BeliefStateImplicits}
+import BeliefStateImplicits._
 import com.glowingavenger.plan.util.ReachGraph._
 
 trait PlanTraversalListener {

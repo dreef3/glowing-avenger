@@ -1,10 +1,7 @@
 package com.glowingavenger.plan.model.action
 
-import com.glowingavenger.plan.model.BeliefState
+import com.glowingavenger.plan.model.state.BeliefState
 
-/**
- * Created by andrey on 09.05.14.
- */
 trait Action {
   val name: String
 

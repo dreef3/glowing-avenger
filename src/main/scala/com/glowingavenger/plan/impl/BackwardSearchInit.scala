@@ -1,8 +1,8 @@
 package com.glowingavenger.plan.impl
 
-import com.glowingavenger.plan.model.BeliefState
 import com.glowingavenger.plan.model.action.LogicAction
-import com.glowingavenger.plan.model.BeliefStateImplicits._
+import com.glowingavenger.plan.model.state.{BeliefState, BeliefStateImplicits}
+import BeliefStateImplicits._
 
 trait PlanInitializer {
   protected def initState(): BeliefState
@@ -14,10 +14,10 @@ trait BackwardSearchInit extends PlanInitializer with Axioms with ProblemAware {
       case a: LogicAction => a
     }
     val backward = new BackwardSearch(problem.domain.predicates, actions,
-      Some(applyAxiom(problem.init, problem.goal).asBoolExp))
+      Some(chooseAxiom(problem.domain.axioms)(problem.init, problem.goal)))
     backward.search(problem.init, problem.goal) match {
       case Some(model) => BeliefState(model)
-      case _ => BeliefState.apply(problem.init)
+      case _ => BeliefState(problem.init)
     }
   }
 }

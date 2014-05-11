@@ -1,9 +1,9 @@
 package com.glowingavenger.plan.util
 
 import org.scalatest.{Matchers, FlatSpec}
-import com.glowingavenger.plan.model.BeliefState
 import org.sat4j.scala.Logic._
 import com.glowingavenger.plan.model.action.{NoAction, LogicAction, Action}
+import com.glowingavenger.plan.model.state.BeliefState
 
 class ASearchSpec extends FlatSpec with Matchers {
   behavior of "A* Search"
@@ -26,7 +26,7 @@ class ASearchSpec extends FlatSpec with Matchers {
   }
 
   it should "find a path to goal" in new Env {
-    val result = search.search((new BeliefState(Map('L -> Some(false), 'B -> None, 'S -> Some(true))), NoAction()), (new BeliefState(Map('L -> Some(true), 'B -> Some(true), 'S -> Some(true))), NoAction()))
+    val result = search.search((BeliefState(Map('L -> Some(false), 'B -> None, 'S -> Some(true))), NoAction()), (BeliefState(Map('L -> Some(true), 'B -> Some(true), 'S -> Some(true))), NoAction()))
     result should not be None
   }
 }

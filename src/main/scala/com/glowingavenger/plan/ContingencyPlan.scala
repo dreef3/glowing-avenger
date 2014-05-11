@@ -22,7 +22,7 @@ import org.jgrapht.DirectedGraph
 import org.jgrapht.graph.{DefaultDirectedGraph, DefaultEdge}
 import ReachGraph.graphToReachGraph
 import org.sat4j.scala.Logic.True
-import com.glowingavenger.plan.model.Answer
+import com.glowingavenger.plan.model.state.Answer
 import scala.Some
 import com.glowingavenger.plan.model.action.{NoAction, LogicAction, Action, Question}
 import com.glowingavenger.plan.impl.BackwardSearch
@@ -62,7 +62,7 @@ class ContingencyPlan(val problem: Problem) {
 
   def build(): PlanDescription = {
     val init = backward.search(problem.init, problem.goal) match {
-      case Some(c) => new BeliefState(c)
+      case Some(c) => BeliefState(c)
       case None => throw new UnsupportedOperationException("Goal is unreachable")
     }
     val front = Queue(init)
@@ -83,7 +83,7 @@ class ContingencyPlan(val problem: Problem) {
   }
 
   private def pathToGoal(state: BeliefState, producer: Action = NoAction()) = {
-    guaranteed.search((state, producer), (BeliefState.apply(problem.goal), NoAction())) match {
+    guaranteed.search((state, producer), (BeliefState(problem.goal), NoAction())) match {
       case Some(path) => path2Edges(path)
       case None => Nil
     }
@@ -103,7 +103,7 @@ class ContingencyPlan(val problem: Problem) {
   }
 
   private def applyAxioms(state: BeliefState): BeliefState = {
-    BeliefState.apply(state.asBoolExp & axiom, state.attrs.keys)
+    BeliefState(state.asBoolExp & axiom, state.attrs.keys)
   }
 
   private def questionSuccessors(state: BeliefState): List[(BeliefState, Action)] = {

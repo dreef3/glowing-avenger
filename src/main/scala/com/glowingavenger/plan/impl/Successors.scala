@@ -2,10 +2,10 @@ package com.glowingavenger.plan.impl
 
 import com.glowingavenger.plan.model._
 import com.glowingavenger.plan.util.ASearch
-import com.glowingavenger.plan.model.Answer
 import scala.Some
 import com.glowingavenger.plan.ActionEdge
 import com.glowingavenger.plan.model.action.{NoAction, Action, Question}
+import com.glowingavenger.plan.model.state.{Answer, BeliefState}
 
 trait Successors {
   protected def successors(state: BeliefState): List[ActionEdge] = Nil
@@ -48,7 +48,7 @@ trait GuaranteedPathSuccessors extends Successors with Axioms with ProblemAware 
   }
 
   private def guaranteedPath(state: BeliefState, producer: Action = NoAction()) = {
-    guaranteed.search((state, producer), (BeliefState.apply(problem.goal), NoAction())) match {
+    guaranteed.search((state, producer), (BeliefState(problem.goal), NoAction())) match {
       case Some(path) => path2Edges(path)
       case None => Nil
     }

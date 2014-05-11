@@ -1,19 +1,16 @@
 package com.glowingavenger.plan.model.action
 
-import com.glowingavenger.plan.model.{Answer, BeliefState}
+import com.glowingavenger.plan.model.state.{BeliefState, Answer}
 
-/**
- * Created by andrey on 09.05.14.
- */
 case class Question(attr: Symbol) extends Action {
   override def result(state: BeliefState): BeliefState = {
     if (applicableIn(state))
-      Answer(state.attrs, attr)
+      Answer(state.predicates, attr)
     else state
   }
 
   override def applicableIn(state: BeliefState): Boolean = {
-    state.attrs.contains(attr) && state.attrs(attr) == None
+    state.predicates.contains(attr) && state.predicates(attr) == None
   }
 
   override def attrs: List[Symbol] = attr :: Nil
