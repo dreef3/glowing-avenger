@@ -5,6 +5,7 @@ import com.glowingavenger.plan.ActionEdge
 import com.glowingavenger.plan.util.ASearch
 import com.glowingavenger.plan.model.action.{Question, NoAction, Action}
 import org.sat4j.scala.Logic.BoolExp
+import com.glowingavenger.plan.model.Problem
 
 trait PathSuccessors extends Successors with Axioms with ProblemAware {
   protected val search = new ASearch[(BeliefState, Action)] {
@@ -37,8 +38,8 @@ trait PathSuccessors extends Successors with Axioms with ProblemAware {
   }
 
   protected def pathStates(path: List[ActionEdge]): List[BeliefState] = Nil
-  
-  override protected def successors(state: BeliefState): (List[ActionEdge], List[BeliefState]) = {
+
+  override def successors(state: BeliefState): (List[ActionEdge], List[BeliefState]) = {
     val (edges, states) = super.successors(state)
     val path = makePath(state)
     (edges ::: path, states ::: pathStates(path))
@@ -65,7 +66,7 @@ trait MixedPathSuccessors extends GuaranteedPathSuccessors {
 
   override protected def makePath(state: BeliefState, producer: Action = NoAction()) = {
     val bestPath = super.makePath(state, producer)
-    val answerBranches =  bestPath collect {
+    val answerBranches = bestPath collect {
       case ActionEdge(f, t, q: Question) =>
         q.result(f) match {
           case a: Answer if a.yes includes t => ActionEdge(f, applyAxiom(a.no), q)
@@ -90,5 +91,37 @@ trait GuaranteedPathSuccessors extends PathSuccessors {
       if result != node._1
     } yield (applyAxiom(result), action)
   }
+}
 
+/**
+ * MixedPathSuccessors and GuaranteedPathSuccessors cannot be stacked together because
+ * the first one inherits from another and overrides it's methods
+ */
+trait CompoundPathSuccessors extends Successors with Axioms with ProblemAware {
+  val mixedPath = new MixedPathSuccessors {
+    override protected def applyAxiom(clauses: BeliefState*): BeliefState =
+      CompoundPathSuccessors.this.applyAxiom(clauses: _*)
+
+    override protected def axiom(axioms: Iterable[BoolExp]): (Iterable[BeliefState]) => BoolExp =
+      CompoundPathSuccessors.this.axiom(axioms)
+
+    override def problem: Problem = CompoundPathSuccessors.this.problem
+  }
+
+  val guaranteedPath = new GuaranteedPathSuccessors {
+    override protected def applyAxiom(clauses: BeliefState*): BeliefState =
+      CompoundPathSuccessors.this.applyAxiom(clauses: _*)
+
+    override protected def axiom(axioms: Iterable[BoolExp]): (Iterable[BeliefState]) => BoolExp =
+      CompoundPathSuccessors.this.axiom(axioms)
+
+    override def problem: Problem = CompoundPathSuccessors.this.problem
+  }
+
+  override def successors(state: BeliefState): (List[ActionEdge], List[BeliefState]) = {
+    val (edges, states) = super.successors(state)
+    val guaranteed = guaranteedPath.successors(state)
+    val mixed = mixedPath.successors(state)
+    (edges ::: guaranteed._1 ::: mixed._1, states ::: guaranteed._2 ::: mixed._2)
+  }
 }
