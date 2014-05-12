@@ -8,7 +8,7 @@ import BeliefStateImplicits._
 class GuaranteedPathSuccessorsSpec extends PlanSpec {
   behavior of "Guaranteed path builder"
 
-  trait TestEnv extends GuaranteedPathSuccessors with DefaultAxioms with ProblemEnv {
+  trait TestEnv extends ProblemEnv with DefaultAxioms with GuaranteedPathSuccessors {
   }
 
   it should "build a path of logic actions only" in new TestEnv {

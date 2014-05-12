@@ -4,7 +4,7 @@ import com.glowingavenger.plan.impl._
 import com.glowingavenger.plan.model.Problem
 
 class ContingencyPlan(override val problem: Problem) extends AbstractPlanner
-with BackwardSearchInit with DefaultAxioms with GuaranteedPathSuccessors with QuestionSuccessors {
+with BackwardSearchInit with DefaultAxioms with GuaranteedPathSuccessors with QuestionSuccessors with MixedPathSuccessors {
 
 }
 
