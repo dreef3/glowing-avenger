@@ -5,12 +5,13 @@ import com.glowingavenger.plan.model.action.Question
 import com.glowingavenger.plan.model.state.{Answer, BeliefState}
 
 trait Successors {
-  protected def successors(state: BeliefState): List[ActionEdge] = Nil
+  protected def successors(state: BeliefState): (List[ActionEdge], List[BeliefState]) = (Nil, Nil)
 }
 
 trait QuestionSuccessors extends Successors with Axioms {
-  override protected def successors(state: BeliefState): List[ActionEdge] = {
-    super.successors(state) ::: state.unknown.map(Question).map {
+  override protected def successors(state: BeliefState): (List[ActionEdge], List[BeliefState]) = {
+    val (edges, states) = super.successors(state)
+    val questions = state.unknown.map(Question).map {
       question =>
         question.result(state) match {
           case a: Answer =>
@@ -19,6 +20,7 @@ trait QuestionSuccessors extends Successors with Axioms {
           case _ => Nil
         }
     }.flatten
+    (edges ::: questions, states ::: questions.map(_.to))
   }
 }
 

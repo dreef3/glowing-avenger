@@ -12,7 +12,7 @@ class GuaranteedPathSuccessorsSpec extends PlanSpec {
   }
 
   it should "build a path of logic actions only" in new TestEnv {
-    val list = successors(initState)
+    val list = successors(initState)._1
     list should have size 3
     list shouldBe List(ActionEdge(~'L & 'S.? & 'B.?, ~'L & ~'S & 'B.?, actions.find(_.name == "off_light").get),
       ActionEdge(~'L & ~'S & 'B.?, ~'L & ~'S & 'B, actions.find(_.name == "ch_bulb").get),

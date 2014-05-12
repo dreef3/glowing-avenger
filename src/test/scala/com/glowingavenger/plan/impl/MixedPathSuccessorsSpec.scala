@@ -11,7 +11,7 @@ class MixedPathSuccessorsSpec extends PlanSpec {
   }
 
   it should "build a mixed path" in new TestEnv {
-    val list = successors(initState)
+    val list = successors(initState)._1
     list should (be (List(
       ActionEdge(initState, BeliefState('L.? & 'S & 'B.?), actions.find(_.name == "on_light").get),
       ActionEdge(BeliefState('L.? & 'S & 'B.?), goalState, Question('L)))) or be (

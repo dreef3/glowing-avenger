@@ -27,11 +27,8 @@ abstract class AbstractPlanner extends Successors with Axioms with ProblemAware 
     if (front.isEmpty) plan
     else {
       val (next, nextQueue) = front.dequeue
-      val edges = successors(next)
-      val answers = edges collect {
-        case ActionEdge(from, to, q: Question) if from == next => to
-      }
-      buildRec(nextQueue ++ answers, plan ++ edges)
+      val (edges, queued) = successors(next)
+      buildRec(nextQueue ++ queued.toSet, plan ++ edges.toSet)
     }
   }
 }

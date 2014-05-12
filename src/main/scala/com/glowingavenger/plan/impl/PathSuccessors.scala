@@ -29,15 +29,19 @@ trait PathSuccessors extends Successors with Axioms with ProblemAware {
       ActionEdge(path.head._1, path.tail.head._1, path.tail.head._2) :: Nil ::: path2Edges(path.tail)
   }
 
-  protected def path(state: BeliefState, producer: Action = NoAction()) = {
+  protected def makePath(state: BeliefState, producer: Action = NoAction()) = {
     search.search((state, producer), (BeliefState(problem.goal), NoAction())) match {
       case Some(path) => path2Edges(path)
       case None => Nil
     }
   }
 
-  override protected def successors(state: BeliefState): List[ActionEdge] = {
-    super.successors(state) ::: path(state)
+  protected def pathStates(path: List[ActionEdge]): List[BeliefState] = Nil
+  
+  override protected def successors(state: BeliefState): (List[ActionEdge], List[BeliefState]) = {
+    val (edges, states) = super.successors(state)
+    val path = makePath(state)
+    (edges ::: path, states ::: pathStates(path))
   }
 }
 
@@ -49,7 +53,7 @@ trait MixedPathSuccessors extends GuaranteedPathSuccessors {
       MixedPathSuccessors.this.axiom(axioms)
 
     def searchSuccessors(node: (BeliefState, Action)): List[(BeliefState, Action)] = {
-      successors(node._1) map {
+      successors(node._1)._1 map {
         case ActionEdge(f, t, a) => (t, a)
       }
     }
@@ -59,8 +63,8 @@ trait MixedPathSuccessors extends GuaranteedPathSuccessors {
     super.searchSuccessors(node) ::: questionSuccessors.searchSuccessors(node)
   }
 
-  override protected def path(state: BeliefState, producer: Action = NoAction()) = {
-    val bestPath = super.path(state, producer)
+  override protected def makePath(state: BeliefState, producer: Action = NoAction()) = {
+    val bestPath = super.makePath(state, producer)
     val answerBranches =  bestPath collect {
       case ActionEdge(f, t, q: Question) =>
         q.result(f) match {
@@ -70,6 +74,11 @@ trait MixedPathSuccessors extends GuaranteedPathSuccessors {
     }
 
     bestPath ::: answerBranches
+  }
+
+  override protected def pathStates(path: List[ActionEdge]): List[BeliefState] = path collect {
+    // Need to process vertices with more than one unknown attribute
+    case ActionEdge(_, to, _) if !to.unknown.isEmpty => to
   }
 }
 
