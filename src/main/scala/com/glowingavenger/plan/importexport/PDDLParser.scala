@@ -87,7 +87,7 @@ private[importexport] object PDDLParser extends StandardTokenParsers with Packra
     case f1 ~ f2 => f1 & f2
   } | term ~ ("|" ~> formula) ^^ {
     case f1 ~ f2 => f1 | f2
-  } | term ~ ("->" ~> formula) ^^ {
+  } | term ~ (">->" ~> formula) ^^ {
     case f1 ~ f2 => f1 implies f2
   } | term ~ ("<->" ~> formula) ^^ {
     case f1 ~ f2 => f1 iff f2
@@ -109,7 +109,7 @@ private[importexport] object PDDLParser extends StandardTokenParsers with Packra
 }
 
 private[importexport] class PDDLLexical extends StdLexical {
-  delimiters +=("(", "(:", ")", "=", "&", "|", "~", "->", "<->", "?", ":")
+  delimiters +=("(", "(:", ")", "=", "&", "|", "~", ">->", "<->", "?", ":")
   reserved +=("define", "domain", "predicates", "actions", "axiom", "problem", "init",
     "goal", "action", "effect", "precondition")
 

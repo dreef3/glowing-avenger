@@ -70,4 +70,14 @@ class PDDLParserSpec extends FlatSpec with Matchers {
         List('L iff ('B & 'S)), "bulb"),
       ~'L, 'L, "switch_on")
   }
+
+  it should "parse Alarm domain definition" in {
+    val parsed = parse(Source.fromFile("src/test/resources/Alarm_domain.pddl").mkString)(domain)
+    parsed should not be null
+  }
+
+  it should "parse full Alarm definition" in {
+    val parsed = parse(Source.fromFile("src/main/resources/Alarm.pddl").mkString)(pddl)
+    parsed should not be null
+  }
 }
